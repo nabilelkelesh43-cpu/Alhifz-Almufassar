@@ -32,8 +32,7 @@
     <main id="tab-q" class="cnt">
         <div class="card">
             <h3 style="margin-bottom:15px; color:var(--green);"><i class="fas fa-book-open"></i> المصحف المفسر</h3>
-            <p style="font-size: 14px; line-height: 1.6;">بإمكانك الوصول إلى نسخة المصحف المفسر المعتمدة في الحلقة من هنا:</p>
-            <div id="pdf-link-container" style="margin-top:20px;">
+            <div id="pdf-link-container">
                 <p style="color:#888; font-style:italic;">بإمكان المشرف إضافة رابط المصحف من لوحة التحكم.</p>
             </div>
         </div>
@@ -46,37 +45,32 @@
                 جاري جلب البيانات من الجدول...
             </div>
             <button id="next-task-btn" class="btn-main" style="display:none; margin-top:20px;" onclick="completeTask()">
-                تم الإنجاز - عرض التالي <i class="fas fa-arrow-left"></i>
+                تم الإنجاز - التالي <i class="fas fa-arrow-left"></i>
             </button>
         </div>
 
         <div class="card admin-section">
             <div class="card-header admin-hdr"><i class="fas fa-user-shield"></i> <h4>إدارة الحلقة</h4></div>
-            
             <div id="admin-login-form">
                 <input type="password" id="pw-inp" placeholder="كلمة المرور">
                 <button class="btn-main" onclick="checkPw()" style="margin-top:10px; background:#444;">دخول المشرف</button>
             </div>
-
             <div id="admin-tools" style="display:none;">
                 <div class="input-group">
                     <label>رابط Google Sheet (CSV):</label>
                     <input type="text" id="sheet-url-input" placeholder="ضع رابط CSV هنا">
                 </div>
-                
                 <div class="input-group" style="margin-top:10px;">
                     <label>نوع الأسبوع الحالي:</label>
                     <select id="week-mode-select">
-                        <option value="hifz">أسبوع حفظ (بالترتيب)</option>
-                        <option value="review">أسبوع مراجعة (الفوائت فقط)</option>
+                        <option value="hifz">أسبوع حفظ (جديد)</option>
+                        <option value="review">أسبوع مراجعة (الفوائت)</option>
                     </select>
                 </div>
-
                 <div class="input-group" style="margin-top:10px;">
                     <label>رابط المصحف (PDF):</label>
-                    <input type="text" id="pdf-url-input" placeholder="رابط جوجل درايف للملف">
+                    <input type="text" id="pdf-url-input" placeholder="رابط الملف">
                 </div>
-
                 <button class="btn-main" onclick="saveAdminSettings()" style="background:#28a745; margin-top:15px;">حفظ ونشر التعديلات</button>
                 <button class="btn-main" onclick="location.reload()" style="background:#6c757d; margin-top:10px;">خروج</button>
             </div>
