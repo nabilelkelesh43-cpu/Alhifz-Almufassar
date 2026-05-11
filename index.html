@@ -41,9 +41,7 @@
     <main id="tab-c" class="cnt active">
         <div class="card" id="task-card">
             <div class="card-header"><i class="fas fa-star"></i> <h3>ورد اليوم</h3></div>
-            <div id="smart-task-content" class="task-content">
-                جاري جلب البيانات من الجدول...
-            </div>
+            <div id="smart-task-content" class="task-content">جاري جلب البيانات...</div>
             <button id="next-task-btn" class="btn-main" style="display:none; margin-top:20px;" onclick="completeTask()">
                 تم الإنجاز - التالي <i class="fas fa-arrow-left"></i>
             </button>
@@ -52,13 +50,12 @@
         <div class="card admin-section">
             <div class="card-header admin-hdr"><i class="fas fa-user-shield"></i> <h4>إدارة الحلقة</h4></div>
             <div id="admin-login-form">
-                <input type="password" id="pw-inp" placeholder="كلمة المرور">
-                <button class="btn-main" onclick="checkPw()" style="margin-top:10px; background:#444;">دخول المشرف</button>
+                <button class="btn-main" onclick="checkPwPrompt()" style="background:#444;">لوحة المشرف</button>
             </div>
             <div id="admin-tools" style="display:none;">
                 <div class="input-group">
                     <label>رابط Google Sheet (CSV):</label>
-                    <input type="text" id="sheet-url-input" placeholder="ضع رابط CSV هنا">
+                    <input type="text" id="sheet-url-input">
                 </div>
                 <div class="input-group" style="margin-top:10px;">
                     <label>نوع الأسبوع الحالي:</label>
@@ -69,7 +66,7 @@
                 </div>
                 <div class="input-group" style="margin-top:10px;">
                     <label>رابط المصحف (PDF):</label>
-                    <input type="text" id="pdf-url-input" placeholder="رابط الملف">
+                    <input type="text" id="pdf-url-input">
                 </div>
                 <button class="btn-main" onclick="saveAdminSettings()" style="background:#28a745; margin-top:15px;">حفظ ونشر التعديلات</button>
                 <button class="btn-main" onclick="location.reload()" style="background:#6c757d; margin-top:10px;">خروج</button>
@@ -77,9 +74,17 @@
         </div>
     </main>
 
+    <main id="tab-f" class="cnt">
+        <div class="card">
+            <h3 style="color:#d9534f;"><i class="fas fa-hand-holding-usd"></i> سجل الغرامات</h3>
+            <div id="fines-content" style="margin-top:20px;"></div>
+        </div>
+    </main>
+
     <nav class="bot-nav">
         <div class="nav-it" onclick="switchTab('q')"><i class="fas fa-book"></i><span>المصحف</span></div>
         <div class="nav-it active" onclick="switchTab('c')"><i class="fas fa-tasks"></i><span>الالتزامات</span></div>
+        <div class="nav-it" onclick="switchTab('f')"><i class="fas fa-file-invoice-dollar"></i><span>الغرامات</span></div>
     </nav>
 </div>
 
