@@ -3,28 +3,48 @@ const DEFAULT_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRDWHrj_Mh4
 let allTasks = [];
 let currentTaskIndex = 0;
 let completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
-// مصفوفة لتخزين المقاطع التي تمت مراجعتها "نهائياً" لكي لا تظهر مرة أخرى
 let permanentReviewed = JSON.parse(localStorage.getItem('permanentReviewed')) || [];
+let adminTapCount = 0;
 
-function switchTab(tabId) {
-    document.querySelectorAll('.cnt').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-it').forEach(el => el.classList.remove('active'));
-    document.getElementById('tab-' + tabId).classList.add('active');
-    const navs = document.querySelectorAll('.nav-it');
-    if(tabId === 'q') navs[0].classList.add('active');
-    else if(tabId === 'c') navs[1].classList.add('active');
-    else if(tabId === 'f') { navs[2].classList.add('active'); checkFines(); }
+// نظام التسجيل والترقيم
+function registerUser() {
+    const name = document.getElementById('reg-name').value;
+    if (name.length < 5) return alert("يرجى كتابة الاسم الثلاثي");
+    
+    // توليد رقم اشتراك يعتمد على الوقت (ثابت ولا يتغير)
+    const userId = "U-" + Date.now().toString().slice(-6);
+    localStorage.setItem('userName', name);
+    localStorage.setItem('userId', userId);
+    
+    location.reload();
+}
+
+function signInApp() {
+    document.getElementById('scr-login').classList.remove('active');
+    document.getElementById('scr-main').classList.add('active');
+    fetchData();
+}
+
+// الدخول السري للمشرف
+function handleAdminTap() {
+    adminTapCount++;
+    if (adminTapCount === 5) {
+        adminTapCount = 0;
+        if (prompt("كلمة مرور المشرف:") === "123456") {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('scr-admin').classList.add('active');
+            document.getElementById('sheet-url-input').value = localStorage.getItem('customSheetUrl') || DEFAULT_URL;
+            document.getElementById('pdf-url-input').value = localStorage.getItem('customPdfUrl') || "";
+        }
+    }
 }
 
 async function fetchData() {
     const activeUrl = localStorage.getItem('customSheetUrl') || DEFAULT_URL;
     const mode = localStorage.getItem('weekMode') || 'hifz';
-    const savedPdf = localStorage.getItem('customPdfUrl');
+    const pdf = localStorage.getItem('customPdfUrl');
     
-    if(savedPdf) {
-        document.getElementById('pdf-link-container').innerHTML = `<a href="${savedPdf}" target="_blank" class="btn-main" style="text-decoration:none; display:block; text-align:center;">فتح المصحف</a>`;
-    }
-
+    if(pdf) document.getElementById('pdf-link-container').innerHTML = `<a href="${pdf}" target="_blank" class="btn-main">فتح المصحف</a>`;
     document.getElementById('status-badge').innerText = mode === 'hifz' ? "أسبوع حفظ" : "أسبوع مراجعة";
 
     try {
@@ -34,7 +54,7 @@ async function fetchData() {
         allTasks = rows.slice(1).filter(r => r.length >= 2 && r[0] !== "");
         renderLogic(mode);
     } catch (e) {
-        document.getElementById('smart-task-content').innerHTML = "⚠️ خطأ في البيانات.";
+        document.getElementById('smart-task-content').innerHTML = "⚠️ خطأ في تحميل البيانات.";
     }
 }
 
@@ -43,14 +63,12 @@ function renderLogic(mode) {
         currentTaskIndex = parseInt(localStorage.getItem('currentTaskIndex')) || 0;
         displayTask(allTasks[currentTaskIndex], "تم الإنجاز - التالي");
     } else {
-        // منطق المراجعة: استخراج المقاطع التي (تم حفظها) وَ (لم تُراجع نهائياً بعد)
-        const pendingReviewIndex = completedTasks.find(idx => !permanentReviewed.includes(idx));
-        
-        if (pendingReviewIndex !== undefined) {
-            currentTaskIndex = pendingReviewIndex;
-            displayTask(allTasks[currentTaskIndex], "تمت المراجعة - التالي");
+        const pendingIdx = completedTasks.find(idx => !permanentReviewed.includes(idx));
+        if (pendingIdx !== undefined) {
+            currentTaskIndex = pendingIdx;
+            displayTask(allTasks[pendingIdx], "تمت المراجعة - التالي");
         } else {
-            document.getElementById('smart-task-content').innerHTML = "⭐ أحسنت! راجعت كل ما تم حفظه سابقاً.";
+            document.getElementById('smart-task-content').innerHTML = "⭐ أحسنت! أكملت مراجعة كل المحفوظ.";
             document.getElementById('next-task-btn').style.display = 'none';
         }
     }
@@ -59,24 +77,21 @@ function renderLogic(mode) {
 function displayTask(task, btnText) {
     const container = document.getElementById('smart-task-content');
     const btn = document.getElementById('next-task-btn');
-    const mode = localStorage.getItem('weekMode') || 'hifz';
-    
     if (!task) {
-        container.innerHTML = "🏁 انتهى الجدول.";
+        container.innerHTML = "🏁 انتهى ورد الأسبوع.";
         btn.style.display = 'none';
         return;
     }
-
     const [sura, verses, link] = task;
+    const mode = localStorage.getItem('weekMode') || 'hifz';
+    
     let html = `<h3>${sura}</h3><p>النطاق: ${verses}</p><hr>`;
-
     if (mode === 'hifz') {
         html += `<div class="task-steps"><p><i class="fas fa-headphones"></i> سماع التفسير</p><p><i class="fas fa-repeat"></i> تسميع 3 مرات</p></div>`;
-        if(link) html += `<a href="${link}" target="_blank" class="task-link">فتح المقطع</a>`;
+        if(link) html += `<a href="${link}" target="_blank" style="color:#007bff; text-decoration:none; font-weight:bold;">[فتح مقطع التفسير]</a>`;
     } else {
-        html += `<div class="task-steps"><p><i class="fas fa-microphone"></i> تسميع مرة واحدة فقط</p></div>`;
+        html += `<div class="task-steps"><p><i class="fas fa-microphone"></i> تسميع مرة واحدة</p></div>`;
     }
-
     container.innerHTML = html;
     btn.innerText = btnText;
     btn.style.display = 'block';
@@ -92,7 +107,6 @@ function completeTask() {
         currentTaskIndex++;
         localStorage.setItem('currentTaskIndex', currentTaskIndex);
     } else {
-        // إضافة المقطع لمصفوفة "المراجعة النهائية" لكي لا يظهر في أسابيع المراجعة القادمة
         permanentReviewed.push(currentTaskIndex);
         localStorage.setItem('permanentReviewed', JSON.stringify(permanentReviewed));
     }
@@ -100,34 +114,34 @@ function completeTask() {
 }
 
 function startNewWeek(mode) {
-    if(confirm(`بدء أسبوع ${mode === 'hifz' ? 'حفظ' : 'مراجعة'} جديد؟ سيتم احتساب غرامة للمقصرين.`)) {
-        let totalFines = parseInt(localStorage.getItem('totalFinesAmount')) || 0;
-        
-        // غرامة إذا انتهى الأسبوع ولم يكمل الطالب الورد المعروض
-        if (allTasks.length > 0 && currentTaskIndex < allTasks.length && mode === 'hifz') {
-            totalFines += 50;
-            localStorage.setItem('totalFinesAmount', totalFines);
-            let history = JSON.parse(localStorage.getItem('finesHistory')) || [];
-            history.push({ date: new Date().toLocaleDateString('ar-EG'), amount: 50 });
-            localStorage.setItem('finesHistory', JSON.stringify(history));
-        }
+    if(!confirm("هل تريد بدء أسبوع جديد فعلاً؟")) return;
+    
+    let fines = parseInt(localStorage.getItem('totalFinesAmount')) || 0;
+    const lastMode = localStorage.getItem('weekMode') || 'hifz';
+    const lastIndex = parseInt(localStorage.getItem('currentTaskIndex')) || 0;
 
-        localStorage.setItem('weekMode', mode);
-        localStorage.setItem('currentTaskIndex', 0); // تصفير عداد الأسبوع الجديد
-        alert("تم التحديث.");
-        location.reload();
+    // إصلاح منطق الغرامة: لا تُحسب إلا إذا كان هناك مهام متبقية فعلياً في أسبوع الحفظ
+    if (lastMode === 'hifz' && allTasks.length > 0 && lastIndex < allTasks.length) {
+        fines += 50;
+        localStorage.setItem('totalFinesAmount', fines);
+        let history = JSON.parse(localStorage.getItem('finesHistory')) || [];
+        history.push({ date: new Date().toLocaleDateString('ar-EG'), amount: 50 });
+        localStorage.setItem('finesHistory', JSON.stringify(history));
     }
+
+    localStorage.setItem('weekMode', mode);
+    localStorage.setItem('currentTaskIndex', 0);
+    alert("تم تحديث الأسبوع.");
+    location.reload();
 }
 
 function checkFines() {
-    const finesContainer = document.getElementById('fines-content');
     const total = localStorage.getItem('totalFinesAmount') || 0;
     const history = JSON.parse(localStorage.getItem('finesHistory')) || [];
     let historyHtml = history.map(h => `<div style="font-size:12px; border-bottom:1px solid #eee; padding:5px;">${h.date} - غرامة 50 ج</div>`).join('');
-
-    finesContainer.innerHTML = `
+    
+    document.getElementById('fines-content').innerHTML = `
         <div class="fine-box">
-            <div style="font-size:13px; color:#666;">إجمالي الغرامات</div>
             <div class="fine-amount">${total} ج.م</div>
             <div style="margin-top:10px; text-align:right;">${historyHtml || 'السجل نظيف'}</div>
         </div>
@@ -136,35 +150,41 @@ function checkFines() {
 }
 
 function resetFines() {
-    if(prompt("الباسورد:") === "123456") {
+    if(prompt("كلمة سر التصفير:") === "123456") {
         localStorage.setItem('totalFinesAmount', 0);
         localStorage.setItem('finesHistory', JSON.stringify([]));
         location.reload();
     }
 }
 
-function checkPwPrompt() {
-    if(prompt("الباسورد:") === "123456") {
-        document.getElementById('admin-login-form').style.display = 'none';
-        document.getElementById('admin-tools').style.display = 'block';
-    }
-}
-
 function saveAdminSettings() {
     localStorage.setItem('customSheetUrl', document.getElementById('sheet-url-input').value);
     localStorage.setItem('customPdfUrl', document.getElementById('pdf-url-input').value);
-    alert("تم الحفظ.");
+    alert("تم حفظ الروابط");
 }
 
-function signInGoogle() {
-    document.getElementById('scr-login').classList.remove('active');
-    document.getElementById('scr-main').classList.add('active');
-    fetchData();
+function switchTab(tabId) {
+    document.querySelectorAll('.cnt').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-it').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    const navs = document.querySelectorAll('.nav-it');
+    if(tabId === 'q') navs[0].classList.add('active');
+    else if(tabId === 'c') navs[1].classList.add('active');
+    else { navs[2].classList.add('active'); checkFines(); }
 }
 
 window.onload = () => {
+    const userName = localStorage.getItem('userName');
+    const userId = localStorage.getItem('userId');
+    
     setTimeout(() => {
         document.getElementById('scr-loading').classList.remove('active');
-        document.getElementById('scr-login').classList.add('active');
+        if (!userName) {
+            document.getElementById('scr-register').classList.add('active');
+        } else {
+            document.getElementById('scr-login').classList.add('active');
+            document.getElementById('welcome-msg').innerText = "مرحباً يا " + userName;
+            document.getElementById('user-id-badge').innerText = "كود المشترك: " + userId;
+        }
     }, 1000);
 };

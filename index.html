@@ -14,17 +14,27 @@
     <div class="loading-spinner"></div>
 </div>
 
+<div class="screen" id="scr-register">
+    <div class="login-card">
+        <i class="fas fa-user-plus" style="font-size:40px; color:var(--green);"></i>
+        <h3>تسجيل مشترك جديد</h3>
+        <input type="text" id="reg-name" placeholder="اكتب اسمك الثلاثي">
+        <button class="btn-main" onclick="registerUser()" style="margin-top:15px;">الحصول على رقم الاشتراك</button>
+    </div>
+</div>
+
 <div class="screen" id="scr-login">
     <div class="login-card">
         <div class="login-icon"><i class="fas fa-quran"></i></div>
-        <h2>مرحباً بك</h2>
-        <button class="btn-google" onclick="signInGoogle()">دخول مباشر</button>
+        <h2 id="welcome-msg">مرحباً بك</h2>
+        <div id="user-id-badge" style="margin-bottom:20px; font-weight:bold; color:var(--green);"></div>
+        <button class="btn-main" onclick="signInApp()">دخول للتطبيق</button>
     </div>
 </div>
 
 <div class="screen" id="scr-main">
     <header class="app-hdr">
-        <div class="hdr-brand">حلقة الحفظ</div>
+        <div class="hdr-brand" onclick="handleAdminTap()">حلقة الحفظ</div>
         <div id="status-badge" class="hdr-user">متصل</div>
     </header>
 
@@ -37,27 +47,8 @@
 
     <main id="tab-c" class="cnt active">
         <div class="card">
-            <div class="card-header"><i class="fas fa-star"></i> <h3>ورد اليوم</h3></div>
             <div id="smart-task-content" class="task-content">جاري التحميل...</div>
             <button id="next-task-btn" class="btn-main" style="display:none; margin-top:20px;" onclick="completeTask()">تم الإنجاز - التالي</button>
-        </div>
-
-        <div class="card admin-section">
-            <div id="admin-login-form">
-                <button class="btn-main" style="background:#444;" onclick="checkPwPrompt()">لوحة المشرف</button>
-            </div>
-            <div id="admin-tools" style="display:none;">
-                <div class="admin-actions">
-                    <p style="color:red; font-weight:bold; font-size:12px;">بدء دورة أسبوعية جديدة:</p>
-                    <button class="btn-main" onclick="startNewWeek('hifz')" style="background:#28a745; margin-bottom:10px;">أسبوع حفظ (جديد)</button>
-                    <button class="btn-main" onclick="startNewWeek('review')" style="background:#007bff;">أسبوع مراجعة (تراكمي)</button>
-                </div>
-                <label>رابط الشيت:</label>
-                <input type="text" id="sheet-url-input">
-                <label>رابط المصحف:</label>
-                <input type="text" id="pdf-url-input">
-                <button class="btn-main" onclick="saveAdminSettings()" style="background:#6c757d; margin-top:10px;">حفظ الروابط</button>
-            </div>
         </div>
     </main>
 
@@ -73,6 +64,27 @@
         <div class="nav-it active" onclick="switchTab('c')"><i class="fas fa-tasks"></i><span>الالتزامات</span></div>
         <div class="nav-it" onclick="switchTab('f')"><i class="fas fa-file-invoice-dollar"></i><span>الغرامات</span></div>
     </nav>
+</div>
+
+<div class="screen" id="scr-admin">
+    <header class="app-hdr">
+        <div class="hdr-brand">لوحة التحكم السرية</div>
+        <button onclick="location.reload()" style="border:none; background:none; color:red;">خروج</button>
+    </header>
+    <div class="cnt active">
+        <div class="admin-actions">
+            <p style="font-weight:bold; color:red;">بدء أسبوع جديد:</p>
+            <button class="btn-main" onclick="startNewWeek('hifz')" style="background:#28a745; margin-bottom:10px;">أسبوع حفظ</button>
+            <button class="btn-main" onclick="startNewWeek('review')" style="background:#007bff;">أسبوع مراجعة</button>
+        </div>
+        <div class="card">
+            <label>رابط الشيت (CSV):</label>
+            <input type="text" id="sheet-url-input">
+            <label style="margin-top:10px; display:block;">رابط المصحف (PDF):</label>
+            <input type="text" id="pdf-url-input">
+            <button class="btn-main" onclick="saveAdminSettings()" style="background:#6c757d; margin-top:15px;">حفظ الإعدادات</button>
+        </div>
+    </div>
 </div>
 
 <script src="script.js"></script>
