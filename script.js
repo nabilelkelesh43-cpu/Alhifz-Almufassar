@@ -3,28 +3,26 @@ const DEFAULT_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRDWHrj_Mh4
 let allTasks = [];
 let currentTaskIndex = 0;
 let completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
+// مصفوفة لتخزين المقاطع التي تمت مراجعتها "نهائياً" لكي لا تظهر مرة أخرى
+let permanentReviewed = JSON.parse(localStorage.getItem('permanentReviewed')) || [];
 
 function switchTab(tabId) {
     document.querySelectorAll('.cnt').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-it').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + tabId).classList.add('active');
-    
     const navs = document.querySelectorAll('.nav-it');
     if(tabId === 'q') navs[0].classList.add('active');
     else if(tabId === 'c') navs[1].classList.add('active');
-    else if(tabId === 'f') {
-        navs[2].classList.add('active');
-        checkFines(); 
-    }
+    else if(tabId === 'f') { navs[2].classList.add('active'); checkFines(); }
 }
 
 async function fetchData() {
     const activeUrl = localStorage.getItem('customSheetUrl') || DEFAULT_URL;
     const mode = localStorage.getItem('weekMode') || 'hifz';
-    
     const savedPdf = localStorage.getItem('customPdfUrl');
+    
     if(savedPdf) {
-        document.getElementById('pdf-link-container').innerHTML = `<a href="${savedPdf}" target="_blank" class="btn-main" style="text-decoration:none; display:block; text-align:center;">فتح المصحف المفسر</a>`;
+        document.getElementById('pdf-link-container').innerHTML = `<a href="${savedPdf}" target="_blank" class="btn-main" style="text-decoration:none; display:block; text-align:center;">فتح المصحف</a>`;
     }
 
     document.getElementById('status-badge').innerText = mode === 'hifz' ? "أسبوع حفظ" : "أسبوع مراجعة";
@@ -36,7 +34,7 @@ async function fetchData() {
         allTasks = rows.slice(1).filter(r => r.length >= 2 && r[0] !== "");
         renderLogic(mode);
     } catch (e) {
-        document.getElementById('smart-task-content').innerHTML = "⚠️ تعذر جلب البيانات.";
+        document.getElementById('smart-task-content').innerHTML = "⚠️ خطأ في البيانات.";
     }
 }
 
@@ -45,12 +43,14 @@ function renderLogic(mode) {
         currentTaskIndex = parseInt(localStorage.getItem('currentTaskIndex')) || 0;
         displayTask(allTasks[currentTaskIndex], "تم الإنجاز - التالي");
     } else {
-        const pendingReviewIndex = completedTasks.find(idx => !localStorage.getItem(`revived_${idx}`));
+        // منطق المراجعة: استخراج المقاطع التي (تم حفظها) وَ (لم تُراجع نهائياً بعد)
+        const pendingReviewIndex = completedTasks.find(idx => !permanentReviewed.includes(idx));
+        
         if (pendingReviewIndex !== undefined) {
             currentTaskIndex = pendingReviewIndex;
             displayTask(allTasks[currentTaskIndex], "تمت المراجعة - التالي");
         } else {
-            document.getElementById('smart-task-content').innerHTML = "⭐ أحسنت! انتهت المراجعة.";
+            document.getElementById('smart-task-content').innerHTML = "⭐ أحسنت! راجعت كل ما تم حفظه سابقاً.";
             document.getElementById('next-task-btn').style.display = 'none';
         }
     }
@@ -62,27 +62,22 @@ function displayTask(task, btnText) {
     const mode = localStorage.getItem('weekMode') || 'hifz';
     
     if (!task) {
-        container.innerHTML = "🏁 انتهى ورد الأسبوع.";
+        container.innerHTML = "🏁 انتهى الجدول.";
         btn.style.display = 'none';
         return;
     }
 
     const [sura, verses, link] = task;
-    let content = `<h2 style="color:var(--green); margin-top:0;">${sura}</h2><p><strong>المقطع:</strong> ${verses}</p><hr style="border:0; border-top:1px solid #eee; margin:15px 0;">`;
+    let html = `<h3>${sura}</h3><p>النطاق: ${verses}</p><hr>`;
 
     if (mode === 'hifz') {
-        content += `
-            <div class="task-steps">
-                <p><i class="fas fa-headphones"></i> 1. سماع مقطع التفسير.</p>
-                <p><i class="fas fa-repeat"></i> 2. التسميع (3 مرات).</p>
-            </div>
-            ${link ? `<a href="${link}" target="_blank" class="task-link">فتح مقطع التفسير</a>` : ''}
-        `;
+        html += `<div class="task-steps"><p><i class="fas fa-headphones"></i> سماع التفسير</p><p><i class="fas fa-repeat"></i> تسميع 3 مرات</p></div>`;
+        if(link) html += `<a href="${link}" target="_blank" class="task-link">فتح المقطع</a>`;
     } else {
-        content += `<div class="task-steps"><p><i class="fas fa-microphone"></i> مطلوب: تسميع المقطع (مرة واحدة فقط).</p></div>`;
+        html += `<div class="task-steps"><p><i class="fas fa-microphone"></i> تسميع مرة واحدة فقط</p></div>`;
     }
 
-    container.innerHTML = content;
+    container.innerHTML = html;
     btn.innerText = btnText;
     btn.style.display = 'block';
 }
@@ -97,53 +92,68 @@ function completeTask() {
         currentTaskIndex++;
         localStorage.setItem('currentTaskIndex', currentTaskIndex);
     } else {
-        localStorage.setItem(`revived_${currentTaskIndex}`, "true");
+        // إضافة المقطع لمصفوفة "المراجعة النهائية" لكي لا يظهر في أسابيع المراجعة القادمة
+        permanentReviewed.push(currentTaskIndex);
+        localStorage.setItem('permanentReviewed', JSON.stringify(permanentReviewed));
     }
     fetchData();
 }
 
+function startNewWeek(mode) {
+    if(confirm(`بدء أسبوع ${mode === 'hifz' ? 'حفظ' : 'مراجعة'} جديد؟ سيتم احتساب غرامة للمقصرين.`)) {
+        let totalFines = parseInt(localStorage.getItem('totalFinesAmount')) || 0;
+        
+        // غرامة إذا انتهى الأسبوع ولم يكمل الطالب الورد المعروض
+        if (allTasks.length > 0 && currentTaskIndex < allTasks.length && mode === 'hifz') {
+            totalFines += 50;
+            localStorage.setItem('totalFinesAmount', totalFines);
+            let history = JSON.parse(localStorage.getItem('finesHistory')) || [];
+            history.push({ date: new Date().toLocaleDateString('ar-EG'), amount: 50 });
+            localStorage.setItem('finesHistory', JSON.stringify(history));
+        }
+
+        localStorage.setItem('weekMode', mode);
+        localStorage.setItem('currentTaskIndex', 0); // تصفير عداد الأسبوع الجديد
+        alert("تم التحديث.");
+        location.reload();
+    }
+}
+
 function checkFines() {
     const finesContainer = document.getElementById('fines-content');
-    const now = new Date();
-    const day = now.getDay(); 
-    const hour = now.getHours();
-    
-    // الموعد النهائي: السبت (6) الساعة 5 فجراً
-    const isAfterDeadline = (day === 6 && hour >= 5) || (day === 0); 
-    
-    let fineAmount = 0;
-    let message = "لا توجد غرامات مستحقة. جزاك الله خيراً!";
-
-    if (isAfterDeadline && completedTasks.length < allTasks.length) {
-        fineAmount = 50;
-        message = "غرامة لعدم إنهاء الورد قبل فجر السبت.";
-    }
+    const total = localStorage.getItem('totalFinesAmount') || 0;
+    const history = JSON.parse(localStorage.getItem('finesHistory')) || [];
+    let historyHtml = history.map(h => `<div style="font-size:12px; border-bottom:1px solid #eee; padding:5px;">${h.date} - غرامة 50 ج</div>`).join('');
 
     finesContainer.innerHTML = `
         <div class="fine-box">
-            <div style="font-size:14px; color:#666;">إجمالي الغرامات المستحقة</div>
-            <div class="fine-amount">${fineAmount} ج.م</div>
-            <div style="color:#d9534f; font-weight:bold;">${message}</div>
+            <div style="font-size:13px; color:#666;">إجمالي الغرامات</div>
+            <div class="fine-amount">${total} ج.م</div>
+            <div style="margin-top:10px; text-align:right;">${historyHtml || 'السجل نظيف'}</div>
         </div>
+        <button class="btn-main" onclick="resetFines()" style="background:#444; margin-top:10px;">تصفير (للمشرف)</button>
     `;
 }
 
+function resetFines() {
+    if(prompt("الباسورد:") === "123456") {
+        localStorage.setItem('totalFinesAmount', 0);
+        localStorage.setItem('finesHistory', JSON.stringify([]));
+        location.reload();
+    }
+}
+
 function checkPwPrompt() {
-    if(prompt("كلمة المرور:") === "123456") {
+    if(prompt("الباسورد:") === "123456") {
         document.getElementById('admin-login-form').style.display = 'none';
         document.getElementById('admin-tools').style.display = 'block';
-        document.getElementById('sheet-url-input').value = localStorage.getItem('customSheetUrl') || DEFAULT_URL;
-        document.getElementById('week-mode-select').value = localStorage.getItem('weekMode') || 'hifz';
-        document.getElementById('pdf-url-input').value = localStorage.getItem('customPdfUrl') || '';
-    } else { alert("خطأ!"); }
+    }
 }
 
 function saveAdminSettings() {
     localStorage.setItem('customSheetUrl', document.getElementById('sheet-url-input').value);
-    localStorage.setItem('weekMode', document.getElementById('week-mode-select').value);
     localStorage.setItem('customPdfUrl', document.getElementById('pdf-url-input').value);
-    alert("تم الحفظ");
-    location.reload();
+    alert("تم الحفظ.");
 }
 
 function signInGoogle() {
@@ -156,5 +166,5 @@ window.onload = () => {
     setTimeout(() => {
         document.getElementById('scr-loading').classList.remove('active');
         document.getElementById('scr-login').classList.add('active');
-    }, 1200);
+    }, 1000);
 };
