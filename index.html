@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الحلقة الاحترافي</title>
+    <title>حلقة الحفظ الاحترافية</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
@@ -14,17 +14,17 @@
 
 <div class="screen" id="scr-register">
     <div class="login-card">
-        <i class="fas fa-user-shield" style="font-size:40px; color:var(--green);"></i>
+        <i class="fas fa-quran" style="font-size:40px; color:var(--green);"></i>
         <h3>تسجيل عضو جديد</h3>
         <input type="text" id="reg-name" placeholder="الاسم الثلاثي">
-        <button class="btn-main" onclick="registerUser()" style="margin-top:15px;">إنشاء الحساب وبدء الالتزام</button>
+        <button class="btn-main" onclick="registerUser()" style="margin-top:15px;">بدء الرحلة</button>
     </div>
 </div>
 
 <div class="screen" id="scr-main">
     <header class="app-hdr">
         <div class="hdr-brand" onclick="handleAdminTap()">حلقة الحفظ</div>
-        <div id="status-badge" class="hdr-user">جاري التحميل...</div>
+        <div id="status-badge" class="hdr-user">تحميل...</div>
     </header>
 
     <main id="tab-c" class="cnt active">
@@ -32,37 +32,54 @@
         <button id="btn-next-lesson" class="btn-main" style="display:none; background:#28a745; margin-top:10px;" onclick="unlockNextHifz()">طلب المقطع التالي +</button>
     </main>
 
+    <main id="tab-q" class="cnt">
+        <div class="card" style="text-align:center;">
+            <i class="fas fa-book-open" style="font-size:40px; color:var(--green); margin-bottom:15px;"></i>
+            <h3>المصحف الشريف</h3>
+            <p id="quran-note" style="color:var(--gray); margin-bottom:20px; font-size:14px;"></p>
+            <a id="quran-link" href="#" target="_blank" class="btn-main" style="text-decoration:none; display:inline-block;">فتح ملف المصحف</a>
+        </div>
+    </main>
+
     <main id="tab-f" class="cnt">
         <div class="card">
-            <h3 style="color:var(--danger); text-align:center;"><i class="fas fa-users"></i> سجل الغرامات العام</h3>
+            <h3 style="color:var(--danger); text-align:center;"><i class="fas fa-file-invoice-dollar"></i> سجل الغرامات</h3>
             <div id="fines-board"></div>
         </div>
     </main>
 
     <nav class="bot-nav">
         <div class="nav-it active" onclick="switchTab('c')"><i class="fas fa-tasks"></i><span>الالتزامات</span></div>
-        <div class="nav-it" onclick="switchTab('f')"><i class="fas fa-file-invoice-dollar"></i><span>الغرامات</span></div>
-        <div class="nav-it" onclick="handleAdminTap()"><i class="fas fa-lock"></i><span>المشرف</span></div>
+        <div class="nav-it" onclick="switchTab('q')"><i class="fas fa-book-quran"></i><span>المصحف</span></div>
+        <div class="nav-it" onclick="switchTab('f')"><i class="fas fa-list-ol"></i><span>الغرامات</span></div>
     </nav>
 </div>
 
 <div class="screen" id="scr-admin">
     <div class="app-hdr">
-        <div class="hdr-brand">إدارة الحلقة</div>
+        <div class="hdr-brand">إدارة المحتوى</div>
         <button onclick="location.reload()" style="color:red; border:none; background:none;">خروج</button>
     </div>
     <div class="cnt active">
         <div class="admin-actions card">
-            <p style="font-weight:bold; color:red;">التحكم في الأسبوع:</p>
-            <button class="btn-main" onclick="startNewWeek('hifz')" style="background:#28a745; margin-bottom:10px;">بدء أسبوع حفظ</button>
-            <button class="btn-main" onclick="startNewWeek('review')" style="background:#007bff;">بدء أسبوع مراجعة</button>
+            <h4>التحكم بالأسبوع</h4>
+            <button class="btn-main" onclick="startNewWeek('hifz')" style="background:#28a745; margin-bottom:10px;">أسبوع حفظ</button>
+            <button class="btn-main" onclick="startNewWeek('review')" style="background:#007bff;">أسبوع مراجعة</button>
         </div>
-        <div class="card">
-            <h4>التقارير والبيانات</h4>
-            <button class="btn-main" onclick="exportAdminReport()" style="background:#6c757d; margin-bottom:10px;">تصدير تقرير المتابعة (CSV)</button>
-            <label>رابط الشيت المصدر:</label>
+        <div class="card admin-settings">
+            <h4>الإعدادات الروابط</h4>
+            <label>رابط شيت السلسلة (CSV):</label>
             <input type="text" id="sheet-url-input">
-            <button class="btn-main" onclick="saveAdminSettings()" style="margin-top:10px;">حفظ الإعدادات</button>
+            
+            <label>رابط ملف المصحف (Drive):</label>
+            <input type="text" id="quran-url-input">
+            
+            <label>نص تذكير المصحف:</label>
+            <input type="text" id="quran-note-input" placeholder="مثلاً: حمل الرابط وافتح من هاتفك">
+            
+            <button class="btn-main" onclick="saveAdminSettings()" style="margin-top:15px;">حفظ جميع التغييرات</button>
+            <hr>
+            <button class="btn-main" onclick="exportAdminReport()" style="background:#6c757d;">تصدير تقرير المتابعة</button>
         </div>
     </div>
 </div>
