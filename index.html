@@ -2,87 +2,57 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>حلقة الحفظ الذكية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حلقة الحفظ - قاعدة البيانات</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="screen active" id="scr-loading">
-    <div class="loading-spinner"></div>
-</div>
+<div class="screen active" id="scr-loading"><div class="loading-spinner"></div></div>
 
 <div class="screen" id="scr-register">
     <div class="login-card">
-        <i class="fas fa-user-plus" style="font-size:40px; color:var(--green);"></i>
-        <h3>تسجيل مشترك جديد</h3>
-        <input type="text" id="reg-name" placeholder="اكتب اسمك الثلاثي">
-        <button class="btn-main" onclick="registerUser()" style="margin-top:15px;">الحصول على رقم الاشتراك</button>
-    </div>
-</div>
-
-<div class="screen" id="scr-login">
-    <div class="login-card">
-        <div class="login-icon"><i class="fas fa-quran"></i></div>
-        <h2 id="welcome-msg">مرحباً بك</h2>
-        <div id="user-id-badge" style="margin-bottom:20px; font-weight:bold; color:var(--green);"></div>
-        <button class="btn-main" onclick="signInApp()">دخول للتطبيق</button>
+        <h3>تسجيل عضو جديد</h3>
+        <input type="text" id="reg-name" placeholder="الاسم الثلاثي">
+        <button class="btn-main" onclick="registerUser()">إنشاء الحساب</button>
     </div>
 </div>
 
 <div class="screen" id="scr-main">
     <header class="app-hdr">
         <div class="hdr-brand" onclick="handleAdminTap()">حلقة الحفظ</div>
-        <div id="status-badge" class="hdr-user">متصل</div>
+        <div id="user-info" class="hdr-user"></div>
     </header>
 
-    <main id="tab-q" class="cnt">
-        <div class="card">
-            <h3><i class="fas fa-book-open"></i> المصحف المفسر</h3>
-            <div id="pdf-link-container"></div>
-        </div>
-    </main>
-
-    <main id="tab-c" class="cnt active">
-        <div class="card">
-            <div id="smart-task-content" class="task-content">جاري التحميل...</div>
-            <button id="next-task-btn" class="btn-main" style="display:none; margin-top:20px;" onclick="completeTask()">تم الإنجاز (تممت المقطع)</button>
-        </div>
-    </main>
-
-    <main id="tab-f" class="cnt">
-        <div class="card">
-            <h3 style="color:#d9534f;"><i class="fas fa-hand-holding-usd"></i> سجل الغرامات</h3>
-            <div id="fines-content"></div>
-        </div>
+    <main class="cnt active">
+        <div id="tasks-container">
+            </div>
+        <button id="btn-next-lesson" class="btn-main" style="display:none; margin-top:10px; background:#28a745;" onclick="unlockNext()">طلب المقطع التالي +</button>
     </main>
 
     <nav class="bot-nav">
-        <div class="nav-it" onclick="switchTab('q')"><i class="fas fa-book"></i><span>المصحف</span></div>
-        <div class="nav-it active" onclick="switchTab('c')"><i class="fas fa-tasks"></i><span>الالتزامات</span></div>
-        <div class="nav-it" onclick="switchTab('f')"><i class="fas fa-file-invoice-dollar"></i><span>الغرامات</span></div>
+        <div class="nav-it active"><i class="fas fa-database"></i><span>قاعدة الإنجاز</span></div>
+        <div class="nav-it" onclick="handleAdminTap()"><i class="fas fa-user-shield"></i><span>المشرف</span></div>
     </nav>
 </div>
 
 <div class="screen" id="scr-admin">
-    <header class="app-hdr">
-        <div class="hdr-brand">لوحة التحكم السرية</div>
-        <button onclick="location.reload()" style="border:none; background:none; color:red;">خروج</button>
-    </header>
+    <div class="app-hdr">
+        <div class="hdr-brand">إدارة البيانات</div>
+        <button onclick="location.reload()" style="color:red; border:none; background:none;">إغلاق</button>
+    </div>
     <div class="cnt active">
-        <div class="admin-actions">
-            <p style="font-weight:bold; color:red;">إدارة الأسبوع الحالي:</p>
-            <button class="btn-main" onclick="startNewWeek('hifz')" style="background:#28a745; margin-bottom:10px;">بدء أسبوع حفظ (مقطع جديد)</button>
-            <button class="btn-main" onclick="startNewWeek('review')" style="background:#007bff;">بدء أسبوع مراجعة</button>
+        <div class="card admin-actions">
+            <h4>تصدير التقارير</h4>
+            <button class="btn-main" onclick="exportData()" style="background:#007bff;">تنزيل ملف الإنجازات (CSV)</button>
+            <p style="font-size:11px; margin-top:5px;">* الملف يحتوي على أسماء الأعضاء وما أنجزوه من حفظ ومراجعة.</p>
         </div>
         <div class="card">
-            <label>رابط الشيت (CSV):</label>
+            <label>رابط المصدر (CSV URL):</label>
             <input type="text" id="sheet-url-input">
-            <label style="margin-top:10px; display:block;">رابط المصحف (PDF):</label>
-            <input type="text" id="pdf-url-input">
-            <button class="btn-main" onclick="saveAdminSettings()" style="background:#6c757d; margin-top:15px;">حفظ الإعدادات</button>
+            <button class="btn-main" onclick="saveAdminSettings()" style="background:#6c757d; margin-top:10px;">حفظ الرابط</button>
         </div>
     </div>
 </div>
