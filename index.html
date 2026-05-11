@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>حلقة الحفظ الذكية</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Amiri:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="screen active" id="scr-loading">
+    <div class="loading-spinner"></div>
+    <p style="margin-top:10px; font-family:'Cairo';">جاري فتح الحلقة...</p>
+</div>
+
+<div class="screen" id="scr-login">
+    <div class="login-card">
+        <div class="login-icon"><i class="fas fa-quran"></i></div>
+        <h2 style="font-family:'Cairo';">مرحباً بك</h2>
+        <button class="btn-google" onclick="signInGoogle()">دخول مباشر</button>
+    </div>
+</div>
+
+<div class="screen" id="scr-main">
+    <header class="app-hdr">
+        <div class="hdr-brand">حلقة الحفظ</div>
+        <div id="status-badge" class="hdr-user">متصل</div>
+    </header>
+
+    <main id="tab-q" class="cnt">
+        <div class="card">
+            <h3 style="margin-bottom:15px; color:var(--green);">المصحف المفسر</h3>
+            <div id="pdf-container-view">
+                <p>سيظهر رابط المصحف هنا بعد تحديثه من قبل المشرف.</p>
+            </div>
+        </div>
+    </main>
+
+    <main id="tab-c" class="cnt active">
+        <div class="card" id="task-card">
+            <div class="card-header"><i class="fas fa-star"></i> <h3>ورد اليوم</h3></div>
+            <div id="smart-task-content" class="task-content">
+                جاري جلب الورد من الجدول...
+            </div>
+            <button id="next-task-btn" class="btn-main" style="display:none; margin-top:20px;" onclick="completeTask()">
+                تم الإنجاز - التالي <i class="fas fa-arrow-left"></i>
+            </button>
+        </div>
+
+        <div class="card admin-section">
+            <div id="admin-login-form">
+                <button class="btn-main" style="background:#666;" onclick="showAdmin()">لوحة التحكم</button>
+            </div>
+            <div id="admin-tools" style="display:none; margin-top:15px;">
+                <input type="password" id="pw-inp" placeholder="كلمة المرور (123456)">
+                <select id="week-mode-select" style="margin-top:10px;">
+                    <option value="hifz">وضع الحفظ</option>
+                    <option value="review">وضع المراجعة</option>
+                </select>
+                <button class="btn-main" style="margin-top:10px;" onclick="saveAdminSettings()">حفظ الإعدادات</button>
+            </div>
+        </div>
+    </main>
+
+    <nav class="bot-nav">
+        <div class="nav-it" onclick="switchTab('q')"><i class="fas fa-book"></i><span>المصحف</span></div>
+        <div class="nav-it active" onclick="switchTab('c')"><i class="fas fa-tasks"></i><span>الالتزامات</span></div>
+    </nav>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
