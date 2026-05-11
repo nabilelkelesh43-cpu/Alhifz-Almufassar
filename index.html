@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حلقة الحفظ الاحترافية</title>
+    <title>حلقة الحفظ - الإصدار الذكي</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
@@ -14,10 +14,10 @@
 
 <div class="screen" id="scr-register">
     <div class="login-card">
-        <i class="fas fa-quran" style="font-size:40px; color:var(--green);"></i>
+        <i class="fas fa-user-plus" style="font-size:40px; color:var(--green);"></i>
         <h3>تسجيل عضو جديد</h3>
         <input type="text" id="reg-name" placeholder="الاسم الثلاثي">
-        <button class="btn-main" onclick="registerUser()" style="margin-top:15px;">بدء الرحلة</button>
+        <button class="btn-main" onclick="registerUser()" style="margin-top:15px;">إنشاء الحساب</button>
     </div>
 </div>
 
@@ -32,54 +32,67 @@
         <button id="btn-next-lesson" class="btn-main" style="display:none; background:#28a745; margin-top:10px;" onclick="unlockNextHifz()">طلب المقطع التالي +</button>
     </main>
 
-    <main id="tab-q" class="cnt">
+    <main id="tab-q" class="cnt" style="display:none;">
         <div class="card" style="text-align:center;">
-            <i class="fas fa-book-open" style="font-size:40px; color:var(--green); margin-bottom:15px;"></i>
+            <i class="fas fa-book-quran" style="font-size:50px; color:var(--green); margin-bottom:15px;"></i>
             <h3>المصحف الشريف</h3>
-            <p id="quran-note" style="color:var(--gray); margin-bottom:20px; font-size:14px;"></p>
-            <a id="quran-link" href="#" target="_blank" class="btn-main" style="text-decoration:none; display:inline-block;">فتح ملف المصحف</a>
+            <p id="quran-note" style="color:var(--gray); margin-bottom:20px;"></p>
+            <a id="quran-link" href="#" target="_blank" class="btn-main" style="text-decoration:none; display:inline-block;">فتح المصحف</a>
         </div>
     </main>
 
-    <main id="tab-f" class="cnt">
-        <div class="card">
-            <h3 style="color:var(--danger); text-align:center;"><i class="fas fa-file-invoice-dollar"></i> سجل الغرامات</h3>
-            <div id="fines-board"></div>
+    <main id="tab-u" class="cnt" style="display:none;">
+        <div class="card profile-card">
+            <div class="profile-header">
+                <i class="fas fa-user-circle"></i>
+                <h3 id="u-name">...</h3>
+                <span id="u-id">...</span>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <small>غرامتك</small>
+                    <strong id="u-fine">0</strong>
+                </div>
+                <div class="stat-box">
+                    <small>المجموع العام</small>
+                    <strong id="total-all-fines">0</strong>
+                </div>
+            </div>
+            <div class="progress-info">
+                <p><i class="fas fa-bookmark"></i> متوقف في الحفظ عند: <br><span id="u-hifz-pos">-</span></p>
+                <hr>
+                <p><i class="fas fa-sync"></i> ديون المراجعة المتبقية: <br><span id="u-rev-count">0 مقاطع</span></p>
+            </div>
         </div>
     </main>
 
     <nav class="bot-nav">
-        <div class="nav-it active" onclick="switchTab('c')"><i class="fas fa-tasks"></i><span>الالتزامات</span></div>
-        <div class="nav-it" onclick="switchTab('q')"><i class="fas fa-book-quran"></i><span>المصحف</span></div>
-        <div class="nav-it" onclick="switchTab('f')"><i class="fas fa-list-ol"></i><span>الغرامات</span></div>
+        <div class="nav-it active" onclick="switchTab('c', this)"><i class="fas fa-tasks"></i><span>الالتزامات</span></div>
+        <div class="nav-it" onclick="switchTab('q', this)"><i class="fas fa-book-open"></i><span>المصحف</span></div>
+        <div class="nav-it" onclick="switchTab('u', this)"><i class="fas fa-user"></i><span>حسابي</span></div>
     </nav>
 </div>
 
 <div class="screen" id="scr-admin">
     <div class="app-hdr">
-        <div class="hdr-brand">إدارة المحتوى</div>
+        <div class="hdr-brand">الإدارة</div>
         <button onclick="location.reload()" style="color:red; border:none; background:none;">خروج</button>
     </div>
     <div class="cnt active">
-        <div class="admin-actions card">
-            <h4>التحكم بالأسبوع</h4>
+        <div class="card admin-actions">
             <button class="btn-main" onclick="startNewWeek('hifz')" style="background:#28a745; margin-bottom:10px;">أسبوع حفظ</button>
             <button class="btn-main" onclick="startNewWeek('review')" style="background:#007bff;">أسبوع مراجعة</button>
         </div>
-        <div class="card admin-settings">
-            <h4>الإعدادات الروابط</h4>
-            <label>رابط شيت السلسلة (CSV):</label>
+        <div class="card">
+            <label>رابط السلسلة (CSV):</label>
             <input type="text" id="sheet-url-input">
-            
-            <label>رابط ملف المصحف (Drive):</label>
+            <label>رابط المصحف:</label>
             <input type="text" id="quran-url-input">
-            
-            <label>نص تذكير المصحف:</label>
-            <input type="text" id="quran-note-input" placeholder="مثلاً: حمل الرابط وافتح من هاتفك">
-            
-            <button class="btn-main" onclick="saveAdminSettings()" style="margin-top:15px;">حفظ جميع التغييرات</button>
+            <label>رسالة التنبيه:</label>
+            <input type="text" id="quran-note-input">
+            <button class="btn-main" onclick="saveAdminSettings()" style="margin-top:10px;">حفظ الإعدادات</button>
             <hr>
-            <button class="btn-main" onclick="exportAdminReport()" style="background:#6c757d;">تصدير تقرير المتابعة</button>
+            <button class="btn-main" onclick="exportAdminReport()" style="background:#6c757d;">تصدير CSV</button>
         </div>
     </div>
 </div>
