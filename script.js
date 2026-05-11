@@ -5,14 +5,13 @@ let allTasks = [];
 let db = JSON.parse(localStorage.getItem('hifz_db')) || {
     userName: "",
     userId: "",
-    currentHifzPointer: 0, // أين وصل في الحفظ
-    tasksStatus: {}, // سجل الحالات {index: {smaa:false, h1:false, h2:false, h3:false, rev:false}}
+    currentHifzPointer: 0, 
+    tasksStatus: {}, 
     fines: 0,
     weekMode: 'hifz',
     hasDoneMinimumThisWeek: false
 };
 
-// محاكاة الغرامات العامة (في الواقع تحتاج سيرفر، لكن هنا سنعرض غرامة العضو الحالي كمثال للشفافية)
 let adminTapCount = 0;
 
 function registerUser() {
@@ -42,7 +41,7 @@ function renderTasks() {
 
     if (mode === 'hifz') {
         const idx = db.currentHifzPointer;
-        if (!allTasks[idx]) return container.innerHTML = "🏁 اكتملت السلسلة!";
+        if (!allTasks[idx]) return container.innerHTML = "<div class='card'>🏁 اكتملت السلسلة!</div>";
         
         const status = db.tasksStatus[idx] || {smaa:false, h1:false, h2:false, h3:false, rev:false};
         container.innerHTML = `
@@ -57,37 +56,38 @@ function renderTasks() {
                 </div>
             </div>
         `;
-        // زر التالي يظهر فقط إذا أنهى الـ 4 مطاليب
+
         if (status.smaa && status.h1 && status.h2 && status.h3) {
             document.getElementById('btn-next-lesson').style.display = "block";
             db.hasDoneMinimumThisWeek = true;
-            saveDB();
         } else {
             document.getElementById('btn-next-lesson').style.display = "none";
+            db.hasDoneMinimumThisWeek = false;
         }
+        saveDB();
 
-    } else { // وضع المراجعة
+    } else { // وضع المراجعة المطور
         let pendingReview = [];
-        // المراجعة هي كل ما هو (محفوظ: أي انتهى مؤشر الحفظ بعده) و (لم يراجع: rev:false)
-        for (let i = 0; i < db.currentHifzPointer; i++) {
+        allTasks.forEach((task, i) => {
             const s = db.tasksStatus[i] || {};
-            if (!s.rev) pendingReview.push(i);
-        }
+            // الشرط: تم تسميعه 3 مرات (محفوظ) ولم يتم تعليمه كمراجع بعد
+            if (s.h3 && !s.rev) pendingReview.push(i);
+        });
 
         if (pendingReview.length === 0) {
-            container.innerHTML = "<div class='card' style='text-align:center;'>✅ لا توجد ديون مراجعة عليك حالياً.</div>";
-            db.hasDoneMinimumThisWeek = true; // أتم الحد الأدنى لأنه لا يوجد شيء أصلاً
+            container.innerHTML = "<div class='card' style='text-align:center;'>✅ لا توجد ديون مراجعة حالياً.</div>";
+            db.hasDoneMinimumThisWeek = true;
         } else {
             pendingReview.forEach(idx => {
                 const item = document.createElement('div');
                 item.className = 'card task-item-rev';
                 item.innerHTML = `
-                    <div style="flex:1"><strong>${allTasks[idx][0]}</strong></div>
+                    <div style="flex:1"><strong>${allTasks[idx][0]}</strong> <br><small>${allTasks[idx][1]}</small></div>
                     <label class="rev-label"><input type="checkbox" onchange="updateTask(${idx}, 'rev')"> مراجعة</label>
                 `;
                 container.appendChild(item);
             });
-            // في المراجعة: الحد الأدنى هو إنهاء القائمة كلها
+            // في المراجعة: يجب إنهاء كل الظاهر في القائمة لتجنب الغرامة
             db.hasDoneMinimumThisWeek = false; 
         }
         saveDB();
@@ -109,35 +109,37 @@ function unlockNextHifz() {
 }
 
 function startNewWeek(newMode) {
-    if (!confirm("تنبيه: سيتم فحص الالتزام وفرض غرامة على المقصرين. هل تريد الاستمرار؟")) return;
+    if (!confirm("تنبيه: سيتم فحص الالتزام وفرض غرامة 50ج على المقصرين. هل تريد الاستمرار؟")) return;
 
-    // فحص الغرامة
+    // فحص التقصير قبل الانتقال
     if (!db.hasDoneMinimumThisWeek) {
         db.fines += 50;
-        alert("تم رصد تقصير: تم إضافة ٥٠ جنيهاً غرامة.");
+        alert("تم رصد تقصير في المتطلبات الأدنى: تم إضافة ٥٠ جنيهاً غرامة.");
+    } else {
+        alert("أحسنت! تم إتمام المطلوب لهذا الأسبوع.");
     }
 
     db.weekMode = newMode;
-    db.hasDoneMinimumThisWeek = false; // تصفير الالتزام للأسبوع الجديد
+    db.hasDoneMinimumThisWeek = false; 
     saveDB();
     location.reload();
 }
 
 function exportAdminReport() {
-    let saved = 0;
-    let reviewed = 0;
+    let savedCount = 0;
+    let reviewedCount = 0;
     for (let key in db.tasksStatus) {
-        if (db.tasksStatus[key].h3) saved++;
-        if (db.tasksStatus[key].rev) reviewed++;
+        if (db.tasksStatus[key].h3) savedCount++;
+        if (db.tasksStatus[key].rev) reviewedCount++;
     }
 
     let csv = "الاسم,الكود,المقاطع المحفوظة,المقاطع المراجعة,إجمالي الغرامات\n";
-    csv += `"${db.userName}","${db.userId}","${saved}","${reviewed}","${db.fines}"`;
+    csv += `"${db.userName}","${db.userId}","${savedCount}","${reviewedCount}","${db.fines}"`;
     
     const uri = "data:text/csv;charset=utf-8,\uFEFF" + encodeURI(csv);
     const link = document.createElement("a");
     link.href = uri;
-    link.download = `تقرير_${db.userName}.csv`;
+    link.download = `تقرير_متابعة_${db.userName}.csv`;
     link.click();
 }
 
@@ -151,12 +153,10 @@ function switchTab(tab) {
 
 function renderFinesBoard() {
     const board = document.getElementById('fines-board');
-    // ملاحظة: في تطبيق حقيقي، هنا نسحب بيانات كل المستخدمين من السيرفر.
-    // هنا سنعرض بيانات العضو الحالي كنموذج للوحة العامة.
     board.innerHTML = `
         <div class="fine-row header"><span>الاسم</span><span>المبلغ</span></div>
         <div class="fine-row"><span>${db.userName}</span><span>${db.fines} ج.م</span></div>
-        <div class="fine-row" style="opacity:0.5;"><span>عضو تجريبي ١</span><span>٠ ج.م</span></div>
+        <div class="fine-row" style="opacity:0.3;"><span>عضو تجريبي</span><span>٠ ج.م</span></div>
     `;
 }
 
