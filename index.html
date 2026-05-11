@@ -12,14 +12,14 @@
 
 <div class="screen active" id="scr-loading">
     <div class="loading-spinner"></div>
-    <p style="margin-top:10px; font-family:'Cairo';">جاري فتح الحلقة...</p>
+    <p style="margin-top:15px; font-family:'Cairo';">جاري فتح الحلقة...</p>
 </div>
 
 <div class="screen" id="scr-login">
     <div class="login-card">
         <div class="login-icon"><i class="fas fa-quran"></i></div>
         <h2 style="font-family:'Cairo';">مرحباً بك</h2>
-        <button class="btn-google" onclick="signInGoogle()">دخول مباشر</button>
+        <button class="btn-google" onclick="signInGoogle()">دخول مباشر للتطبيق</button>
     </div>
 </div>
 
@@ -31,9 +31,10 @@
 
     <main id="tab-q" class="cnt">
         <div class="card">
-            <h3 style="margin-bottom:15px; color:var(--green);">المصحف المفسر</h3>
-            <div id="pdf-container-view">
-                <p>سيظهر رابط المصحف هنا بعد تحديثه من قبل المشرف.</p>
+            <h3 style="margin-bottom:15px; color:var(--green);"><i class="fas fa-book-open"></i> المصحف المفسر</h3>
+            <p style="font-size: 14px; line-height: 1.6;">بإمكانك الوصول إلى نسخة المصحف المفسر المعتمدة في الحلقة من هنا:</p>
+            <div id="pdf-link-container" style="margin-top:20px;">
+                <p style="color:#888; font-style:italic;">بإمكان المشرف إضافة رابط المصحف من لوحة التحكم.</p>
             </div>
         </div>
     </main>
@@ -42,24 +43,42 @@
         <div class="card" id="task-card">
             <div class="card-header"><i class="fas fa-star"></i> <h3>ورد اليوم</h3></div>
             <div id="smart-task-content" class="task-content">
-                جاري جلب الورد من الجدول...
+                جاري جلب البيانات من الجدول...
             </div>
             <button id="next-task-btn" class="btn-main" style="display:none; margin-top:20px;" onclick="completeTask()">
-                تم الإنجاز - التالي <i class="fas fa-arrow-left"></i>
+                تم الإنجاز - عرض التالي <i class="fas fa-arrow-left"></i>
             </button>
         </div>
 
         <div class="card admin-section">
+            <div class="card-header admin-hdr"><i class="fas fa-user-shield"></i> <h4>إدارة الحلقة</h4></div>
+            
             <div id="admin-login-form">
-                <button class="btn-main" style="background:#666;" onclick="showAdmin()">لوحة التحكم</button>
+                <input type="password" id="pw-inp" placeholder="كلمة المرور">
+                <button class="btn-main" onclick="checkPw()" style="margin-top:10px; background:#444;">دخول المشرف</button>
             </div>
-            <div id="admin-tools" style="display:none; margin-top:15px;">
-                <input type="password" id="pw-inp" placeholder="كلمة المرور (123456)">
-                <select id="week-mode-select" style="margin-top:10px;">
-                    <option value="hifz">وضع الحفظ</option>
-                    <option value="review">وضع المراجعة</option>
-                </select>
-                <button class="btn-main" style="margin-top:10px;" onclick="saveAdminSettings()">حفظ الإعدادات</button>
+
+            <div id="admin-tools" style="display:none;">
+                <div class="input-group">
+                    <label>رابط Google Sheet (CSV):</label>
+                    <input type="text" id="sheet-url-input" placeholder="ضع رابط CSV هنا">
+                </div>
+                
+                <div class="input-group" style="margin-top:10px;">
+                    <label>نوع الأسبوع الحالي:</label>
+                    <select id="week-mode-select">
+                        <option value="hifz">أسبوع حفظ (بالترتيب)</option>
+                        <option value="review">أسبوع مراجعة (الفوائت فقط)</option>
+                    </select>
+                </div>
+
+                <div class="input-group" style="margin-top:10px;">
+                    <label>رابط المصحف (PDF):</label>
+                    <input type="text" id="pdf-url-input" placeholder="رابط جوجل درايف للملف">
+                </div>
+
+                <button class="btn-main" onclick="saveAdminSettings()" style="background:#28a745; margin-top:15px;">حفظ ونشر التعديلات</button>
+                <button class="btn-main" onclick="location.reload()" style="background:#6c757d; margin-top:10px;">خروج</button>
             </div>
         </div>
     </main>
