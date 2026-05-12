@@ -92,10 +92,15 @@ const db = firebase.database();
 let currentUser = null;
 let appSettings = {};
 
-function handleLogin() {
-    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+function handleGoogleLogin() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithRedirect(provider);
 }
 
+auth.getRedirectResult().then((result) => {
+    if (result.user) console.log("دخل عبر redirect");
+}).catch((error) => console.error(error));
+    
 auth.onAuthStateChanged(user => {
     document.getElementById('scr-loading').classList.remove('active');
     if (user) {
