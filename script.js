@@ -1,4 +1,4 @@
-// بيانات الربط الخاصة بمشروعك (Firebase Config)
+// بيانات الربط الخاصة بمشروعك
 const firebaseConfig = {
   apiKey: "AIzaSyDxzFOjPwjQL0oAG5lmg0s7VxhoRLbeZc",
   authDomain: "alhifz-almufassar.firebaseapp.com",
@@ -10,27 +10,34 @@ const firebaseConfig = {
   measurementId: "G-56796ZFDZR"
 };
 
-// تهيئة النظام
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database().ref('global_config');
+// تهيئة Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+// التوافق مع الصورة الأخيرة: المسار هو 'hifz_settings'
+const db = firebase.database().ref('hifz_settings');
 
 let allTasks = [];
 let userDb = JSON.parse(localStorage.getItem('hifz_user')) || { name: "", pointer: 0 };
 
-// المزامنة اللحظية مع الإدارة
-function initSync() {
+// المزامنة اللحظية
+function startSync() {
     db.on('value', (snap) => {
         const data = snap.val();
         if (data) {
+            // تحديث روابط الواجهة
             document.getElementById('quran-link').href = data.quranUrl || "#";
             document.getElementById('agreements-text').innerText = data.agreements || "";
             
-            // تحديث قيم لوحة الإدارة تلقائياً
-            document.getElementById('sheet-url-input').value = data.sheetUrl || "";
+            // تعبئة لوحة الإدارة تلقائياً عند فتحها
+            document.getElementById('sheet-url-input').value = data.seriesSheetUrl || "";
             document.getElementById('quran-url-input').value = data.quranUrl || "";
             document.getElementById('agreements-input').value = data.agreements || "";
 
-            if (data.sheetUrl) fetchSheetData(data.sheetUrl);
+            if (data.seriesSheetUrl) {
+                fetchSheetData(data.seriesSheetUrl);
+            }
         }
     });
 }
@@ -39,30 +46,30 @@ async function fetchSheetData(url) {
     try {
         const res = await fetch(`${url}&t=${Date.now()}`);
         const text = await res.text();
-        // تحليل الشيت بناءً على أعمدة (title, ayat, link) كما في صورتك
+        // تحليل الأعمدة (Title, Ayat, Link) كما في شيت "سلسلة التفسير"
         allTasks = text.split('\n').slice(1).map(row => {
             const cols = row.split(',');
             return { title: cols[0], ayat: cols[1], link: cols[2] };
         });
-        renderUI();
+        renderTasks();
     } catch (e) { console.error("Sheet Error"); }
 }
 
-function renderUI() {
+function renderTasks() {
     const container = document.getElementById('tasks-container');
     const p = userDb.pointer;
     
     if (!allTasks[p] || !allTasks[p].title) {
-        container.innerHTML = "<div class='card' style='text-align:center;'>🏁 هنيئاً لك! لقد أتممت السلسلة بنجاح.</div>";
+        container.innerHTML = "<div class='card' style='text-align:center;'>🏁 هنيئاً لك! لقد أتممت السلسلة.</div>";
         return;
     }
 
     container.innerHTML = `
         <div class="card animate-in">
-            <div style="color:#2c5e50; font-weight:bold; margin-bottom:5px;">المقطع الحالي:</div>
-            <h2 style="font-size:1.4rem; margin-bottom:10px;">${allTasks[p].title}</h2>
-            <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:15px;">
-                <i class="fas fa-bookmark" style="color:#2c5e50;"></i> الآيات: ${allTasks[p].ayat}
+            <small style="color:#2c5e50;">المقطع الحالي:</small>
+            <h2 style="font-size:1.3rem; margin:10px 0;">${allTasks[p].title}</h2>
+            <div style="background:#f4f7f6; padding:10px; border-radius:8px; margin-bottom:15px; font-size:0.9rem;">
+                <i class="fas fa-bookmark"></i> ${allTasks[p].ayat}
             </div>
             <a href="${allTasks[p].link}" target="_blank" class="btn-main" style="background:#007bff; text-decoration:none; display:block; text-align:center; margin-bottom:15px;">
                 <i class="fab fa-telegram"></i> فتح مقطع التفسير
@@ -81,8 +88,8 @@ function markDone(el) {
         setTimeout(() => {
             userDb.pointer++;
             localStorage.setItem('hifz_user', JSON.stringify(userDb));
-            renderUI();
-        }, 600);
+            renderTasks();
+        }, 500);
     }
 }
 
@@ -92,15 +99,23 @@ function registerUser() {
         userDb.name = n;
         localStorage.setItem('hifz_user', JSON.stringify(userDb));
         location.reload();
-    } else { alert("يرجى إدخال الاسم الثلاثي بشكل صحيح"); }
+    } else { alert("يرجى إدخال الاسم الثلاثي"); }
 }
 
 function saveAdminSettings() {
     db.update({
-        sheetUrl: document.getElementById('sheet-url-input').value,
+        seriesSheetUrl: document.getElementById('sheet-url-input').value,
         quranUrl: document.getElementById('quran-url-input').value,
         agreements: document.getElementById('agreements-input').value
-    }).then(() => alert("تم التحديث بنجاح!"));
+    }).then(() => alert("تم الحفظ والمزامنة بنجاح!"));
+}
+
+function handleAdminTap() {
+    const pass = prompt("كلمة مرور الإدارة:");
+    if (pass === "123456") {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('scr-admin').classList.add('active');
+    }
 }
 
 function switchTab(id, el) {
@@ -110,14 +125,6 @@ function switchTab(id, el) {
     el.classList.add('active');
 }
 
-function handleAdminTap() {
-    const p = prompt("كلمة مرور الإدارة:");
-    if (p === "123456") {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('scr-admin').classList.add('active');
-    }
-}
-
 window.onload = () => {
     setTimeout(() => {
         document.getElementById('scr-loading').classList.remove('active');
@@ -125,7 +132,7 @@ window.onload = () => {
         else {
             document.getElementById('scr-main').classList.add('active');
             document.getElementById('u-name-display').innerText = userDb.name;
-            initSync();
+            startSync();
         }
     }, 800);
 };
