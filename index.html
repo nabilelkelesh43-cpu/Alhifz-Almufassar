@@ -18,7 +18,7 @@
 <div class="screen" id="scr-register">
     <div class="login-card">
         <i class="fas fa-user-circle" style="font-size:50px; color:#2c5e50;"></i>
-        <h3>أهلاً بك في الحفظ المفسر</h3>
+        <h3>أهلاً بك في الحلقة</h3>
         <input type="text" id="reg-name" placeholder="أدخل اسمك الثلاثي للتسجيل">
         <button class="btn-main" onclick="registerUser()">دخول النظام</button>
     </div>
@@ -38,8 +38,8 @@
         <div class="card" style="text-align:center;">
             <i class="fas fa-book-quran" style="font-size:60px; color:#2c5e50; margin-bottom:20px;"></i>
             <h3>المصحف الشريف</h3>
-            <p style="color:gray; margin-bottom:25px;">رابط مباشر للمصحف المعتمد في الحلقة</p>
-            <a id="quran-link" href="#" target="_blank" class="btn-main" style="text-decoration:none; display:inline-block;">فتح المصحف الآن</a>
+            <p style="color:gray; margin-bottom:25px;">النسخة المعتمدة لمتابعة الحفظ</p>
+            <a id="quran-link" href="#" target="_blank" class="btn-main" style="text-decoration:none; display:inline-block;">فتح المصحف</a>
         </div>
     </main>
 
@@ -51,7 +51,7 @@
     </main>
 
     <nav class="bot-nav">
-        <div class="nav-it active" onclick="switchTab('c', this)"><i class="fas fa-list-check"></i><span>الالتزامات</span></div>
+        <div class="nav-it active" onclick="switchTab('c', this)"><i class="fas fa-tasks"></i><span>الالتزامات</span></div>
         <div class="nav-it" onclick="switchTab('q', this)"><i class="fas fa-book-open"></i><span>المصحف</span></div>
         <div class="nav-it" onclick="switchTab('p', this)"><i class="fas fa-file-signature"></i><span>الاتفاقية</span></div>
     </nav>
@@ -60,7 +60,7 @@
 <div class="screen" id="scr-admin">
     <div class="app-hdr">
         <div class="hdr-brand">إعدادات الإدارة</div>
-        <button onclick="location.reload()" style="color:white; border:none; background:none; font-family:inherit;">خروج</button>
+        <button onclick="location.reload()" style="color:white; border:none; background:none;">خروج</button>
     </div>
     <div class="cnt active">
         <div class="card">
