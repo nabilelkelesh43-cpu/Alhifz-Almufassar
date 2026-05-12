@@ -1,1401 +1,156 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0F6E56">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="حلقة الحفظ">
-<title>حلقة الحفظ</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-:root{
-  --green:#0F6E56;--gl:#E1F5EE;--gm:#1D9E75;
-  --blue:#185FA5;--bl:#E6F1FB;
-  --gold:#BA7517;--goldl:#FAEEDA;
-  --red:#A32D2D;--redl:#FCEBEB;
-  --bg:#f5f4f0;--sur:#fff;--sur2:#f9f8f5;
-  --tx:#1a1a1a;--tx2:#777;
-  --bd:rgba(0,0,0,0.1);--bd2:rgba(0,0,0,0.2);
-  --safe-top:env(safe-area-inset-top,0px);
-  --safe-bot:env(safe-area-inset-bottom,0px);
-}
-html,body{height:100%;overflow:hidden;}
-body{font-family:'Cairo',sans-serif;direction:rtl;background:var(--bg);display:flex;flex-direction:column;}
-@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;500;600&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الحفظ المفسر المتكامل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --green: #2c5e50; --bg: #f4f7f6; --accent: #007bff; --danger: #dc3545; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background: var(--bg); color: #333; }
+        
+        /* شاشات التطبيق */
+        .screen { display: none; min-height: 100vh; width: 100%; }
+        .screen.active { display: flex; flex-direction: column; }
+        
+        /* الهيدر */
+        .app-hdr { background: var(--green); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .hdr-brand { font-weight: bold; cursor: pointer; }
+        .hdr-user { font-size: 0.8rem; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 15px; }
 
-.screen{display:none;flex-direction:column;height:100vh;height:100dvh;}
-.screen.active{display:flex;}
+        .cnt { flex: 1; padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; padding-bottom: 90px; }
+        
+        /* تصميم الكروت والأزرار */
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; }
+        .btn-main { background: var(--green); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; display: block; text-align: center; text-decoration: none; margin-top: 10px; transition: 0.3s; border: none; }
+        .btn-google { background: #4285F4; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-/* LOGIN */
-#scr-login{align-items:center;justify-content:center;padding:24px 20px;background:linear-gradient(160deg,#0a4a38,#0F6E56);}
-.login-card{background:var(--sur);border-radius:24px;padding:40px 28px;width:100%;max-width:360px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.15);}
-.login-icon{width:72px;height:72px;background:var(--gl);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
-.login-icon svg{width:38px;height:38px;color:var(--green);}
-.login-title{font-family:'Amiri',serif;font-size:26px;color:var(--tx);margin-bottom:8px;}
-.login-sub{font-size:13px;color:var(--tx2);margin-bottom:32px;line-height:1.8;}
-.btn-google{width:100%;background:#fff;border:1.5px solid var(--bd2);border-radius:14px;padding:14px 20px;font-family:'Cairo',sans-serif;font-size:15px;font-weight:600;color:var(--tx);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;transition:box-shadow .2s,transform .1s;box-shadow:0 2px 8px rgba(0,0,0,.08);}
-.btn-google:hover{box-shadow:0 4px 16px rgba(0,0,0,.12);}
-.btn-google:active{transform:scale(.98);}
-.btn-google img{width:22px;height:22px;}
-.login-note{font-size:11px;color:var(--tx2);margin-top:16px;line-height:1.6;}
-.login-err{font-size:12px;color:var(--red);margin-top:12px;min-height:16px;}
+        /* شاشة الدخول */
+        .login-container { margin: auto; text-align: center; padding: 20px; }
+        .login-logo { font-size: 60px; color: var(--green); margin-bottom: 20px; }
 
-/* LOADING */
-#scr-loading{align-items:center;justify-content:center;background:var(--bg);}
-.loading-spinner{width:40px;height:40px;border:3px solid var(--gl);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.loading-txt{font-family:'Amiri',serif;font-size:17px;color:var(--tx2);margin-top:16px;}
-
-/* HEADER */
-.app-hdr{background:var(--sur);border-bottom:.5px solid var(--bd);padding:12px 16px;padding-top:calc(12px + var(--safe-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.hdr-left{display:flex;align-items:center;gap:10px;}
-.hdr-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--gl);}
-.hdr-avatar-placeholder{width:34px;height:34px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--green);}
-.hdr-brand{font-family:'Amiri',serif;font-size:19px;color:var(--tx);cursor:default;user-select:none;}
-.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
-.hdr-name{font-size:11px;color:var(--tx2);}
-.dl-badge{font-size:10px;background:var(--goldl);color:var(--gold);border-radius:20px;padding:2px 9px;border:.5px solid #FAC775;}
-
-/* BOTTOM NAV */
-.bot-nav{background:var(--sur);border-top:.5px solid var(--bd);display:flex;padding-bottom:var(--safe-bot);flex-shrink:0;overflow:hidden;}
-.nav-it{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0 6px;cursor:pointer;min-width:0;}
-.nav-it svg{width:19px;height:19px;color:var(--tx2);flex-shrink:0;}
-.nav-it span{font-size:9px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;text-align:center;}
-.nav-it.active svg,.nav-it.active span{color:var(--green);font-weight:600;}
-
-/* CONTENT */
-.cnt{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
-
-/* QURAN */
-.bc{padding:8px 16px;background:var(--sur2);border-bottom:.5px solid var(--bd);display:flex;align-items:center;gap:6px;font-size:12px;flex-shrink:0;flex-wrap:wrap;}
-.bc-a{cursor:pointer;color:var(--green);}
-.bc-s{color:var(--tx2);}
-.bc-c{color:var(--tx);font-weight:500;}
-.srch-wrap{padding:10px 16px;background:var(--sur2);border-bottom:.5px solid var(--bd);flex-shrink:0;}
-.srch{width:100%;background:var(--sur);border:.5px solid var(--bd);border-radius:12px;padding:10px 14px;font-family:'Cairo',sans-serif;font-size:14px;color:var(--tx);direction:rtl;outline:none;-webkit-appearance:none;}
-.srch:focus{border-color:var(--green);}
-.sura-row{background:var(--sur);border:.5px solid var(--bd);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:13px;cursor:pointer;}
-.sura-row:active{background:var(--sur2);}
-.sura-n{width:38px;height:38px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--green);flex-shrink:0;}
-.sura-nm{font-family:'Amiri',serif;font-size:18px;color:var(--tx);}
-.sura-mt{font-size:11px;color:var(--tx2);margin-top:2px;}
-.bdg{font-size:11px;color:var(--green);background:var(--gl);border-radius:20px;padding:3px 10px;white-space:nowrap;}
-.arr{color:var(--tx2);font-size:14px;}
-.back-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--sur);border-bottom:.5px solid var(--bd);flex-shrink:0;}
-.back-b{background:none;border:.5px solid var(--bd2);border-radius:10px;padding:8px 14px;font-family:'Cairo',sans-serif;font-size:13px;color:var(--tx);cursor:pointer;min-height:44px;}
-.scr-ttl{font-family:'Amiri',serif;font-size:17px;color:var(--tx);}
-.topic-row{background:var(--sur);border:.5px solid var(--bd);border-right:3px solid var(--green);border-radius:12px;padding:13px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.topic-row:active{background:var(--gl);}
-.topic-nm{font-size:14px;font-weight:500;color:var(--tx);}
-.topic-ay{font-size:11px;color:var(--tx2);margin-top:2px;}
-
-/* PDF FULL-SCREEN READER */
-.pdf-reader{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#525659;}
-.pdf-topbar{background:rgba(0,0,0,.85);padding:10px 16px;padding-top:calc(10px + var(--safe-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.pdf-back-btn{background:none;border:.5px solid rgba(255,255,255,.3);border-radius:8px;padding:7px 14px;font-family:'Cairo',sans-serif;font-size:13px;color:#fff;cursor:pointer;min-height:36px;}
-.pdf-page-info{font-family:'Cairo',sans-serif;font-size:12px;color:rgba(255,255,255,.7);}
-#pdf-iframe{flex:1;border:none;width:100%;height:100%;}
-.pdf-upload-overlay{position:absolute;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10;}
-.pdf-upload-card{background:var(--sur);border:1.5px dashed var(--bd2);border-radius:16px;padding:32px 24px;text-align:center;width:100%;max-width:320px;cursor:pointer;}
-.pdf-upload-icon{width:52px;height:52px;background:var(--gl);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
-.pdf-upload-icon svg{width:26px;height:26px;color:var(--green);}
-.pdf-upload-title{font-family:'Amiri',serif;font-size:18px;color:var(--tx);margin-bottom:6px;}
-.pdf-upload-sub{font-size:12px;color:var(--tx2);line-height:1.7;}
-.btn-upload-pdf{margin-top:16px;background:var(--green);color:#E1F5EE;border:none;border-radius:10px;padding:10px 24px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;min-height:40px;}
-
-.ayat-box{background:var(--sur);border:.5px solid var(--bd);border-radius:14px;padding:20px;}
-.ayat-hdr{font-size:12px;color:var(--tx2);margin-bottom:14px;padding-bottom:10px;border-bottom:.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
-.bdg-t{background:var(--gl);color:var(--green);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600;}
-.pdf-open-btn{margin-top:14px;width:100%;background:var(--green);border:none;border-radius:12px;padding:13px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:600;color:#E1F5EE;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;}
-.pdf-open-btn:active{opacity:.85;}
-.empty{padding:36px 20px;text-align:center;font-family:'Amiri',serif;font-size:17px;color:var(--tx2);line-height:1.8;}
-
-/* COMMITMENTS */
-.week-info{background:var(--sur);border:.5px solid var(--bd);border-radius:14px;padding:14px 16px;}
-.wi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap;}
-.wi-title{font-family:'Amiri',serif;font-size:17px;color:var(--tx);}
-.wi-dl{font-size:11px;color:var(--gold);background:var(--goldl);border-radius:20px;padding:3px 10px;white-space:nowrap;}
-.wi-sub{font-size:12px;color:var(--tx2);line-height:1.7;}
-.seg-card{background:var(--sur);border:.5px solid var(--bd);border-radius:14px;overflow:hidden;}
-.seg-hdr{background:linear-gradient(135deg,var(--gl),#d4f0e5);padding:16px;}
-.seg-lbl{font-size:11px;color:var(--green);font-weight:600;margin-bottom:4px;}
-.seg-title{font-family:'Amiri',serif;font-size:19px;color:var(--tx);}
-.seg-ayat{font-size:12px;color:var(--tx2);margin-top:3px;}
-.seg-link-btn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;color:var(--blue);background:var(--bl);border:none;border-radius:10px;padding:7px 14px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:500;min-height:36px;}
-.tasks-grid{padding:16px;display:flex;flex-direction:column;gap:12px;}
-.task-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.task-label{font-size:13px;font-weight:500;color:var(--tx);flex:1;}
-.task-label small{display:block;font-size:11px;color:var(--tx2);font-weight:400;margin-top:1px;}
-.toggle-wrap{display:flex;gap:6px;flex-shrink:0;}
-.tog-btn{padding:8px 14px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:.5px solid var(--bd2);background:var(--sur2);color:var(--tx2);min-height:36px;min-width:52px;}
-.tog-btn.done{background:var(--green);border-color:var(--green);color:#E1F5EE;}
-.tog-btn.fail{background:var(--red);border-color:var(--red);color:#FCEBEB;}
-.seg-nav{padding:12px 16px;border-top:.5px solid var(--bd);}
-.seg-nav-btn{width:100%;background:var(--green);border:none;border-radius:12px;padding:13px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:600;color:#E1F5EE;cursor:pointer;min-height:44px;}
-.seg-nav-btn:active{opacity:.85;}
-.board-card{background:var(--sur);border:.5px solid var(--bd);border-radius:14px;padding:14px 16px;}
-.board-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.board-title{font-size:14px;font-weight:600;color:var(--tx);}
-.member-row{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:.5px solid var(--bd);}
-.member-row:last-child{border-bottom:none;}
-.m-rank{font-size:13px;color:var(--tx2);width:22px;text-align:center;flex-shrink:0;}
-.m-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;}
-.m-avatar-ph{width:34px;height:34px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--green);flex-shrink:0;}
-.m-info{flex:1;min-width:0;}
-.m-name{font-size:13px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.m-prog{font-size:11px;color:var(--tx2);margin-top:1px;}
-.pill{font-size:10px;font-weight:600;border-radius:20px;padding:4px 10px;white-space:nowrap;}
-.pill-done{background:var(--gl);color:var(--green);}
-.pill-partial{background:var(--bl);color:var(--blue);}
-.pill-fail{background:var(--redl);color:var(--red);}
-.pill-none{background:var(--sur2);color:var(--tx2);}
-
-/* FINES */
-.fines-summary{background:linear-gradient(135deg,#7A1A1A,var(--red));border-radius:14px;padding:20px 16px;color:#fff;text-align:center;}
-.fines-summary-title{font-family:'Amiri',serif;font-size:18px;margin-bottom:4px;opacity:.9;}
-.fines-summary-total{font-family:'Amiri',serif;font-size:40px;font-weight:700;margin:8px 0;}
-.fines-summary-sub{font-size:12px;opacity:.75;}
-.week-fines-card{background:var(--sur);border:.5px solid var(--bd);border-radius:14px;overflow:hidden;}
-.wfc-header{background:var(--sur2);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:.5px solid var(--bd);}
-.wfc-week{font-size:13px;font-weight:600;color:var(--tx);}
-.wfc-total{font-size:12px;color:var(--red);font-weight:600;}
-.fine-member-row{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:.5px solid var(--bd);}
-.fine-member-row:last-child{border-bottom:none;}
-.fmr-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;}
-.fmr-avatar-ph{width:32px;height:32px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--green);flex-shrink:0;}
-.fmr-info{flex:1;min-width:0;}
-.fmr-name{font-size:13px;font-weight:500;color:var(--tx);}
-.fmr-detail{font-size:11px;color:var(--tx2);margin-top:1px;}
-.fmr-amounts{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
-.fmr-week-fine{font-size:12px;font-weight:600;color:var(--red);}
-.fmr-total-fine{font-size:10px;color:var(--tx2);}
-.fmr-ok{font-size:12px;color:var(--green);font-weight:600;}
-.grand-total-row{background:var(--goldl);border:.5px solid #FAC775;border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
-.gt-label{font-size:13px;color:var(--gold);font-weight:600;}
-.gt-amount{font-family:'Amiri',serif;font-size:22px;color:var(--gold);font-weight:700;}
-
-/* ADMIN */
-#adm-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px;}
-#adm-overlay.show{display:flex;}
-.adm-box{background:var(--sur);border-radius:20px;padding:30px 24px;width:100%;max-width:320px;text-align:center;}
-.adm-box h3{font-family:'Amiri',serif;font-size:20px;color:var(--tx);margin-bottom:6px;}
-.adm-box p{font-size:12px;color:var(--tx2);margin-bottom:20px;}
-.pw-inp{width:100%;background:var(--sur2);border:.5px solid var(--bd2);border-radius:12px;padding:12px;font-family:'Cairo',sans-serif;font-size:18px;color:var(--tx);text-align:center;letter-spacing:6px;outline:none;direction:ltr;-webkit-appearance:none;}
-.pw-inp:focus{border-color:var(--green);}
-.pw-err{font-size:12px;color:var(--red);margin-top:8px;min-height:18px;}
-.adm-btns{display:flex;gap:10px;margin-top:16px;}
-.btn-conf{flex:1;background:var(--green);color:#E1F5EE;border:none;border-radius:12px;padding:12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;}
-.btn-canc{flex:1;background:none;border:.5px solid var(--bd2);border-radius:12px;padding:12px;font-family:'Cairo',sans-serif;font-size:14px;color:var(--tx2);cursor:pointer;min-height:44px;}
-#adm-panel{display:none;position:fixed;inset:0;z-index:998;background:var(--bg);flex-direction:column;}
-#adm-panel.show{display:flex;}
-.adm-hdr{background:var(--sur);border-bottom:.5px solid var(--bd);padding:14px 20px;padding-top:calc(14px + var(--safe-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.adm-hdr-t{font-family:'Amiri',serif;font-size:18px;color:var(--tx);}
-.adm-hdr-s{font-size:11px;color:var(--green);margin-top:1px;}
-.cls-btn{background:none;border:.5px solid var(--bd2);border-radius:10px;padding:8px 16px;font-family:'Cairo',sans-serif;font-size:13px;color:var(--tx2);cursor:pointer;min-height:44px;}
-.adm-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:flex;flex-direction:column;gap:12px;padding-bottom:calc(20px + var(--safe-bot));}
-.adm-card{background:var(--sur);border:.5px solid var(--bd);border-radius:14px;padding:16px;}
-.adm-card-title{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:4px;}
-.adm-card-sub{font-size:12px;color:var(--tx2);margin-bottom:14px;line-height:1.7;}
-.inp{width:100%;background:var(--sur2);border:.5px solid var(--bd2);border-radius:12px;padding:11px 14px;font-family:'Cairo',sans-serif;font-size:14px;color:var(--tx);direction:rtl;outline:none;-webkit-appearance:none;margin-bottom:10px;}
-.inp:focus{border-color:var(--green);}
-.drop-z{border:1.5px dashed var(--bd2);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;}
-.drop-z:active{background:var(--sur2);}
-.drop-ttl{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:4px;}
-.drop-sub{font-size:11px;color:var(--tx2);}
-.btn-ch{margin-top:12px;background:var(--green);color:#E1F5EE;border:none;border-radius:10px;padding:9px 20px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;min-height:40px;}
-.cur-file{display:flex;align-items:center;gap:10px;background:var(--gl);border-radius:10px;padding:10px 14px;margin-bottom:10px;}
-.fdot{width:8px;height:8px;border-radius:50%;background:var(--gm);flex-shrink:0;}
-.fnm{font-size:13px;font-weight:500;color:var(--green);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.st-msg{font-size:12px;text-align:center;padding:8px 12px;border-radius:10px;background:var(--sur2);color:var(--tx2);}
-.st-msg.ok{background:#EAF3DE;color:#3B6D11;}
-.st-msg.err{background:var(--redl);color:var(--red);}
-.segs-prev{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;margin-top:10px;}
-.seg-prev-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--sur2);border-radius:9px;}
-.spn{width:22px;height:22px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--green);font-weight:600;flex-shrink:0;}
-.spt{font-size:12px;color:var(--tx);flex:1;}
-.spa{font-size:10px;color:var(--tx2);}
-.members-list{display:flex;flex-direction:column;gap:6px;}
-.madm-row{display:flex;align-items:center;gap:8px;background:var(--sur2);border-radius:10px;padding:10px 12px;}
-.madm-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;}
-.madm-nm{flex:1;font-size:13px;color:var(--tx);}
-.btn-rm{background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;padding:4px 8px;min-height:36px;}
-.btn-save{background:var(--blue);color:var(--bl);border:none;border-radius:12px;padding:13px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:600;cursor:pointer;width:100%;min-height:44px;}
-.code-note{font-size:11px;color:var(--tx2);background:var(--sur2);border-radius:8px;padding:8px 12px;line-height:1.7;}
-code{font-family:monospace;background:var(--bd);padding:1px 5px;border-radius:4px;font-size:11px;direction:ltr;display:inline-block;}
-
-/* logout btn */
-.logout-btn{background:none;border:.5px solid var(--bd2);border-radius:8px;padding:5px 12px;font-family:'Cairo',sans-serif;font-size:11px;color:var(--tx2);cursor:pointer;}
-</style>
+        /* شريط التنقل السفلي */
+        .bot-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #eee; height: 65px; z-index: 1000; }
+        .nav-it { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; cursor: pointer; }
+        .nav-it.active { color: var(--green); }
+        .nav-it i { font-size: 1.2rem; }
+        .nav-it span { font-size: 0.7rem; margin-top: 2px; }
+    </style>
 </head>
 <body>
 
-<!-- ADMIN PW -->
-<div id="adm-overlay">
-  <div class="adm-box">
-    <h3>وضع المشرف</h3>
-    <p>أدخل كلمة السر للمتابعة</p>
-    <input class="pw-inp" type="password" id="pw-inp" maxlength="20" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
-    <div class="pw-err" id="pw-err"></div>
-    <div class="adm-btns">
-      <button class="btn-canc" onclick="closeOverlay()">إلغاء</button>
-      <button class="btn-conf" onclick="checkPw()">دخول</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN PANEL -->
-<div id="adm-panel">
-  <div class="adm-hdr">
-    <div><div class="adm-hdr-t">لوحة المشرف</div><div class="adm-hdr-s">مرئية لك فقط</div></div>
-    <button class="cls-btn" onclick="closeAdmin()">✕ إغلاق</button>
-  </div>
-  <div class="adm-body">
-
-    <div class="adm-card">
-      <div class="adm-card-title">📖 رابط ملف المصحف</div>
-      <div class="adm-card-sub">الصق رابط Google Drive هنا — عند التحديث فقط غيّر الرابط واضغط حفظ.</div>
-      <div id="adm-pdf-cur"></div>
-      <input class="inp" type="text" id="adm-pdf-url-inp" placeholder="https://drive.google.com/file/d/.../view">
-      <button class="btn-save" style="background:var(--green);margin-top:0;" onclick="savePdfUrl()">💾 حفظ الرابط للجميع</button>
-      <div id="adm-pdf-st" class="st-msg" style="display:none;margin-top:8px;"></div>
-      <div class="code-note" style="margin-top:10px;">
-        عند تحديث الملف:<br>
-        ١- ارفع الملف الجديد على Google Drive<br>
-        ٢- انسخ رابط المشاركة<br>
-        ٣- الصقه هنا واضغط حفظ ✓
-      </div>
-    </div>
-
-    <div class="adm-card">
-      <div class="adm-card-title">📋 رابط سلسلة التفسير (Google Sheet)</div>
-      <div class="adm-card-sub">انسخ رابط Google Sheet — يُستخدم في الالتزامات ويظهر تلقائياً في المرفقات.</div>
-      <input class="inp" type="text" id="s-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/...">
-      <button class="btn-save" style="background:var(--green);margin-top:0;" onclick="saveSheetUrl()">💾 حفظ الرابط</button>
-      <div id="s-st" class="st-msg" style="display:none;margin-top:8px;"></div>
-      <div class="code-note" style="margin-top:10px;">
-        الأعمدة المطلوبة في الشيت: <code>title</code> و <code>ayat</code> و <code>link</code><br>
-        اجعل الشيت مشاركاً للعموم (Anyone with link can view)
-      </div>
-    </div>
-
-    <div class="adm-card">
-      <div class="adm-card-title">📢 نص التذكير (تبويب المصحف)</div>
-      <div class="adm-card-sub">يظهر أسفل زر فتح المصحف — عدّله في أي وقت.</div>
-      <textarea class="inp" id="adm-reminder-inp" rows="3" placeholder="مثال: تذكير: حمّل المصحف من الرابط وافتحه بتطبيق PDF من جهازك" style="resize:vertical;margin-bottom:8px;"></textarea>
-      <button class="btn-save" style="background:var(--green);" onclick="saveReminder()">💾 حفظ التذكير</button>
-      <div id="adm-reminder-st" class="st-msg" style="display:none;margin-top:8px;"></div>
-    </div>
-
-    <div class="adm-card">
-      <div class="adm-card-title">📎 المرفقات</div>
-      <div class="adm-card-sub">أضف روابط تظهر للجميع في تبويب المرفقات. اضغط + لإضافة مرفق جديد في أي وقت.</div>
-      <div id="adm-att-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
-      <button class="btn-save" style="background:var(--sur2);color:var(--tx);border:.5px solid var(--bd2);" onclick="addAttachmentRow()">+ إضافة مرفق جديد</button>
-      <div id="adm-att-st" class="st-msg" style="display:none;margin-top:8px;"></div>
-    </div>
-    <div class="adm-card">
-      <div class="adm-card-title">👥 الأعضاء</div>
-      <div class="adm-card-sub">الأعضاء المسجلون عبر Google.</div>
-      <div class="members-list" id="adm-members"><div class="st-msg">جاري التحميل...</div></div>
-    </div>
-
-    <div class="adm-card">
-      <div class="adm-card-title">📜 نص الاتفاقيات</div>
-      <div class="adm-card-sub">يظهر في تبويب "الاتفاقيات" لجميع الأعضاء.</div>
-      <textarea class="inp" id="adm-agree-inp" rows="6" placeholder="اكتب نص الاتفاقيات هنا..." style="resize:vertical;margin-bottom:8px;"></textarea>
-      <button class="btn-save" style="background:var(--green);" onclick="saveAgreements()">💾 حفظ الاتفاقيات</button>
-      <div id="adm-agree-st" class="st-msg" style="display:none;margin-top:8px;"></div>
-    </div>
-
-    <div class="adm-card">
-      <div class="adm-card-title">⚠️ تنبيه شاشة الدخول</div>
-      <div class="adm-card-sub">يظهر أسفل زر تسجيل الدخول لتنبيه الأعضاء قبل الانضمام.</div>
-      <textarea class="inp" id="adm-alert-inp" rows="3" placeholder="مثال: اقرأ الاتفاقيات قبل تسجيل الدخول — الانسحاب يكلفك ٥٠٠ جنيه" style="resize:vertical;margin-bottom:8px;"></textarea>
-      <button class="btn-save" style="background:var(--green);" onclick="saveLoginAlert()">💾 حفظ التنبيه</button>
-      <div id="adm-alert-st" class="st-msg" style="display:none;margin-top:8px;"></div>
-    </div>
-
-    <div class="adm-card">
-      <div class="adm-card-title">🔄 بدء أسبوع جديد</div>
-      <div class="adm-card-sub">اختر نوع الأسبوع — حفظ أم مراجعة. تُحفظ الغرامات تلقائياً في السجل.</div>
-      <button class="btn-save" style="background:var(--green);" onclick="resetWeek()">بدء أسبوع جديد ←</button>
-      <div id="reset-st" class="st-msg" style="display:none;margin-top:8px;"></div>
-    </div>
-
-    <div class="adm-card">
-      <div class="adm-card-title">📊 تصدير تقرير الدورة</div>
-      <div class="adm-card-sub">جدول بكل الأسابيع — رقم المشترك، ما حُفظ، ما رُوجع، الغرامات.</div>
-      <button class="btn-save" style="background:var(--blue);" onclick="exportCSV()">⬇ تصدير CSV</button>
-    </div>
-
-    <div class="adm-card">
-      <div class="adm-card-title">🗑 مسح السجل التاريخي</div>
-      <div class="adm-card-sub">يمسح كل سجل الأسابيع والغرامات والتقدم — لا يمسح بيانات الأعضاء.</div>
-      <button class="btn-save" style="background:var(--red);" onclick="clearHistory()">مسح السجل كاملاً</button>
-      <div id="clear-st" class="st-msg" style="display:none;margin-top:8px;"></div>
-    </div>
-
-  </div>
-</div>
-
-<!-- LOADING -->
 <div class="screen active" id="scr-loading">
-  <div class="loading-spinner"></div>
-  <div class="loading-txt">جاري التحميل...</div>
+    <div style="margin: auto; text-align: center;">
+        <i class="fas fa-circle-notch fa-spin" style="font-size: 40px; color: var(--green);"></i>
+        <p style="margin-top: 15px; color: var(--green);">جاري تهيئة النظام...</p>
+    </div>
 </div>
 
-<!-- LOGIN -->
 <div class="screen" id="scr-login">
-  <div class="login-card">
-    <div class="login-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
-      </svg>
+    <div class="login-container">
+        <div class="card">
+            <i class="fas fa-mosque login-logo"></i>
+            <h2>حلقة الحفظ المفسر</h2>
+            <p style="margin-bottom: 20px; color: #666;">سجل دخولك لمتابعة وردك اليومي</p>
+            <button class="btn-main btn-google" onclick="handleGoogleLogin()">
+                <i class="fab fa-google"></i> الدخول عبر Google
+            </button>
+        </div>
     </div>
-    <div class="login-title">حلقة الحفظ</div>
-    <div class="login-sub">سجّل دخولك بحساب Google<br>للانضمام ومتابعة سلسلة التفسير والحفظ</div>
-    <button class="btn-google" onclick="signInGoogle()">
-      <img src="https://www.google.com/favicon.ico" alt="Google">
-      تسجيل الدخول بـ Google
-    </button>
-    <div class="login-err" id="login-err"></div>
-    <div id="login-alert" style="display:none;background:var(--redl);border:.5px solid #F09595;border-radius:12px;padding:14px 16px;margin-top:12px;font-size:15px;color:var(--red);line-height:1.9;text-align:right;font-family:'Cairo',sans-serif;font-weight:500;"></div>
-    <div class="login-note">بتسجيل دخولك توافق على مشاركة اسمك وصورتك مع أعضاء الحلقة</div>
-  </div>
 </div>
 
-<!-- MAIN APP -->
 <div class="screen" id="scr-main">
-  <div class="app-hdr">
-    <div class="hdr-left">
-      <div id="hdr-avatar-wrap"></div>
-      <div class="hdr-brand" id="adm-trigger">حلقة الحفظ</div>
-    </div>
-    <div class="hdr-right">
-      <div class="hdr-name" id="hdr-name"></div>
-      <div class="dl-badge" id="dl-badge">⏳ ...</div>
-    </div>
-  </div>
+    <header class="app-hdr">
+        <div class="hdr-brand" onclick="checkAdmin()">الحفظ المفسر</div>
+        <div id="display-user-name" class="hdr-user">...</div>
+    </header>
 
-  <!-- QURAN TAB -->
-  <div id="tab-q" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
-    <div class="cnt" id="quran-main-cnt"></div>
-    <div id="qv-pdf" style="display:none;flex-direction:column;flex:1;overflow:hidden;position:relative;"></div>
-  </div>
+    <main class="cnt">
+        <div id="home-content">
+            <div class="card">
+                <h3 id="welcome-msg">أهلاً بك</h3>
+                <p id="stats-msg">جاري تحميل بياناتك...</p>
+            </div>
+            <div id="tasks-list"></div>
+        </div>
+    </main>
 
-  <!-- COMMIT TAB -->
-  <div id="tab-c" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-    <div class="cnt" id="commit-cnt"></div>
-  </div>
-
-  <!-- RANKING TAB -->
-  <div id="tab-r" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-    <div class="cnt" id="rank-cnt"></div>
-  </div>
-
-  <!-- FINES TAB -->
-  <div id="tab-f" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-    <div class="cnt" id="fines-cnt"></div>
-  </div>
-
-  <!-- ATTACHMENTS TAB -->
-  <div id="tab-a" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-    <div class="cnt" id="attach-cnt"></div>
-  </div>
-
-  <!-- AGREEMENTS TAB -->
-  <div id="tab-g" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-    <div class="cnt" id="agree-cnt"></div>
-  </div>
-
-  <!-- PROFILE TAB -->
-  <div id="tab-p" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-    <div class="cnt" id="profile-cnt"></div>
-  </div>
-
-  <div class="bot-nav">
-    <div class="nav-it active" id="nav-q" onclick="switchTab('q')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
-      <span>المصحف</span>
-    </div>
-    <div class="nav-it" id="nav-c" onclick="switchTab('c')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      <span>التزاماتي</span>
-    </div>
-    <div class="nav-it" id="nav-r" onclick="switchTab('r')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
-      <span>الترتيب</span>
-    </div>
-    <div class="nav-it" id="nav-f" onclick="switchTab('f')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      <span>الغرامات</span>
-    </div>
-    <div class="nav-it" id="nav-a" onclick="switchTab('a')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg>
-      <span>المرفقات</span>
-    </div>
-    <div class="nav-it" id="nav-g" onclick="switchTab('g')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>
-      <span>الاتفاقيات</span>
-    </div>
-    <div class="nav-it" id="nav-p" onclick="switchTab('p')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
-      <span>حسابي</span>
-    </div>
-  </div>
+    <nav class="bot-nav">
+        <div class="nav-it active"><i class="fas fa-home"></i><span>الرئيسية</span></div>
+        <div class="nav-it" onclick="alert('قريباً')"><i class="fas fa-book-open"></i><span>المصحف</span></div>
+        <div class="nav-it" onclick="auth.signOut()"><i class="fas fa-sign-out-alt"></i><span>خروج</span></div>
+    </nav>
 </div>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-// ── FIREBASE CONFIG ──
-const firebaseConfig={
-  apiKey:"AIzaSyDxzFOjPwjQL0oAG5lmgOs7VxhoRLbebZc",
-  authDomain:"alhifz-almufassar.firebaseapp.com",
-  databaseURL:"https://alhifz-almufassar-default-rtdb.firebaseio.com",
-  projectId:"alhifz-almufassar",
-  storageBucket:"alhifz-almufassar.firebasestorage.app",
-  messagingSenderId:"137379079577",
-  appId:"1:137379079577:web:41e516c414f4997c8adf08"
+// إعدادات المشروع - بناءً على صورك والمفتاح الجديد
+const firebaseConfig = {
+  apiKey: "AIzaSyDhb5sLqVAhFhu67HllWGiQGXV1Cl_HwhQ",
+  authDomain: "alhifz-almufassar.firebaseapp.com",
+  databaseURL: "https://alhifz-almufassar-default-rtdb.firebaseio.com",
+  projectId: "alhifz-almufassar",
+  storageBucket: "alhifz-almufassar.firebasestorage.app",
+  messagingSenderId: "137379079577",
+  appId: "1:137379079577:web:41e516c414f4997c8adf08"
 };
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.database();
 
-const toAr=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
-const PASS='604114';
+// تهيئة Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const auth = firebase.auth();
+const db = firebase.database();
 
-let currentUser=null;
-let seriesData=[];
-let curSura=0;
-let tapCount=0,tapTimer=null;
+// وظيفة تسجيل الدخول
+function handleGoogleLogin() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    // استخدام PopUp يتجنب مشاكل Domain Authorization في GitHub
+    auth.signInWithPopup(provider)
+        .then((result) => {
+            console.log("نجح الدخول:", result.user.displayName);
+        })
+        .catch((error) => {
+            console.error("خطأ تسجيل الدخول:", error);
+            alert("حدث خطأ أثناء تسجيل الدخول: " + error.message);
+        });
+}
 
-// ── FIREBASE HELPERS ──
-const fbGet=path=>db.ref(path).get().then(s=>s.val());
-const fbSet=(path,val)=>db.ref(path).set(val);
-const fbUpdate=(path,val)=>db.ref(path).update(val);
-
-// ── AUTH ──
-auth.onAuthStateChanged(async user=>{
-  if(user){
-    currentUser=user;
-    // assign sequential member number if new
-    const existing=await fbGet('members/'+user.uid);
-    if(!existing||!existing.memberNum){
-      const counter=((await fbGet('config/memberCounter'))||0)+1;
-      await fbSet('config/memberCounter',counter);
-      await fbUpdate('members/'+user.uid,{
-        name:user.displayName,
-        email:user.email,
-        photo:user.photoURL||'',
-        uid:user.uid,
-        memberNum:counter,
-        joinedAt:Date.now()
-      });
+// مراقبة حالة المستخدم
+auth.onAuthStateChanged((user) => {
+    document.getElementById('scr-loading').classList.remove('active');
+    if (user) {
+        document.getElementById('scr-login').classList.remove('active');
+        document.getElementById('scr-main').classList.add('active');
+        document.getElementById('display-user-name').innerText = user.displayName;
+        loadUserData(user);
     } else {
-      await fbUpdate('members/'+user.uid,{
-        name:user.displayName,
-        email:user.email,
-        photo:user.photoURL||''
-      });
+        document.getElementById('scr-main').classList.remove('active');
+        document.getElementById('scr-login').classList.add('active');
     }
-    launchApp();
-  } else {
-    showScreen('scr-login');
-    try{
-      const alertTxt=await fbGet('config/loginAlert')||'';
-      const alertEl=document.getElementById('login-alert');
-      if(alertTxt){alertEl.style.display='block';alertEl.textContent=alertTxt;}
-      else alertEl.style.display='none';
-    }catch{}
-  }
 });
 
-async function signInGoogle(){
-  try{
-    document.getElementById('login-err').textContent='';
-    const provider=new firebase.auth.GoogleAuthProvider();
-    await auth.signInWithPopup(provider);
-  }catch(e){
-    document.getElementById('login-err').textContent='تعذّر تسجيل الدخول — حاول مرة أخرى';
-    console.error(e);
-  }
-}
-
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-async function launchApp(){
-  showScreen('scr-main');
-  // set header
-  const u=currentUser;
-  document.getElementById('hdr-name').textContent=u.displayName?.split(' ')[0]||'';
-  const avatarWrap=document.getElementById('hdr-avatar-wrap');
-  if(u.photoURL){
-    avatarWrap.innerHTML=`<img src="${u.photoURL}" class="hdr-avatar" referrerpolicy="no-referrer">`;
-  } else {
-    avatarWrap.innerHTML=`<div class="hdr-avatar-placeholder">${(u.displayName||'؟')[0]}</div>`;
-  }
-  await loadSeries();
-  renderQuranTab();
-  updateDeadline();
-  setInterval(updateDeadline,60000);
-  setInterval(autoSync,15000);
-}
-
-async function renderProfile(){
-  const el=document.getElementById('profile-cnt');
-  el.innerHTML='<div class="empty">جاري التحميل...</div>';
-  const uid=currentUser.uid;
-  const member=await fbGet('members/'+uid)||{};
-  const progress=await fbGet('progress')||{};
-  const wrecords=await fbGet('wrecords')||{};
-  const cumulative=await fbGet('finesCumulative')||{};
-  const members=await fbGet('members')||{};
-
-  // calculate ranking
-  const sorted=Object.keys(members).sort((a,b)=>(progress[b]!==undefined?Number(progress[b]):-1)-(progress[a]!==undefined?Number(progress[a]):-1));
-  const myRank=sorted.indexOf(uid)+1;
-  const rankIcon=myRank===1?'🥇':myRank===2?'🥈':myRank===3?'🥉':toAr(myRank);
-
-  // my fines
-  const mwr=wrecords[uid]||{};
-  const done=allDone(mwr);
-  const anyFail=mwr.listen==='fail'||mwr.rec1==='fail'||mwr.rec2==='fail'||mwr.rec3==='fail';
-  const weekFine=anyFail&&!done?50:0;
-  const totalFine=(cumulative[uid]||0)+weekFine;
-
-  const myProg=progress[uid]!==undefined?Number(progress[uid]):-1;
-  const av=currentUser.photoURL?`<img src="${currentUser.photoURL}" referrerpolicy="no-referrer" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--gl);">`:`<div style="width:80px;height:80px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:var(--green);">${(currentUser.displayName||'؟')[0]}</div>`;
-
-  el.innerHTML=`
-    <!-- profile header -->
-    <div style="background:linear-gradient(135deg,#0a4a38,var(--green));border-radius:16px;padding:28px 20px;text-align:center;color:#E1F5EE;">
-      <div style="display:flex;justify-content:center;margin-bottom:14px;">${av}</div>
-      <div style="font-family:'Amiri',serif;font-size:22px;margin-bottom:4px;">${currentUser.displayName||''}</div>
-      <div style="font-size:12px;opacity:.75;">${currentUser.email||''}</div>
-    </div>
-
-    <!-- stats -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div style="background:var(--sur);border:.5px solid var(--bd);border-radius:14px;padding:16px;text-align:center;">
-        <div style="font-size:11px;color:var(--tx2);margin-bottom:6px;">رقم الاشتراك</div>
-        <div style="font-family:'Amiri',serif;font-size:32px;color:var(--green);font-weight:700;">${toAr(member.memberNum||0)}</div>
-      </div>
-      <div style="background:var(--sur);border:.5px solid var(--bd);border-radius:14px;padding:16px;text-align:center;">
-        <div style="font-size:11px;color:var(--tx2);margin-bottom:6px;">ترتيبي</div>
-        <div style="font-size:32px;">${rankIcon}</div>
-        <div style="font-size:11px;color:var(--tx2);margin-top:2px;">${toAr(myRank)} من ${toAr(sorted.length)}</div>
-      </div>
-      <div style="background:var(--sur);border:.5px solid var(--bd);border-radius:14px;padding:16px;text-align:center;">
-        <div style="font-size:11px;color:var(--tx2);margin-bottom:6px;">تقدمي في السلسلة</div>
-        <div style="font-family:'Amiri',serif;font-size:28px;color:var(--blue);font-weight:700;">${toAr(myProg+2)}</div>
-        <div style="font-size:11px;color:var(--tx2);margin-top:2px;">من ${toAr(seriesData.length||0)} مقطع</div>
-      </div>
-      <div style="background:var(--sur);border:.5px solid ${totalFine?'#F09595':'var(--bd)'};border-radius:14px;padding:16px;text-align:center;">
-        <div style="font-size:11px;color:var(--tx2);margin-bottom:6px;">غراماتي الكلية</div>
-        <div style="font-family:'Amiri',serif;font-size:28px;color:${totalFine?'var(--red)':'var(--green)'};font-weight:700;">${toAr(totalFine)}</div>
-        <div style="font-size:11px;color:var(--tx2);margin-top:2px;">جنيه</div>
-      </div>
-    </div>
-
-    <!-- sign out -->
-    <button onclick="confirmSignOut()" style="width:100%;background:var(--redl);border:.5px solid #F09595;border-radius:14px;padding:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:600;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
-      تسجيل الخروج
-    </button>`;
-}
-
-async function confirmSignOut(){
-  if(!confirm('هل تريد تسجيل الخروج؟')) return;
-  await auth.signOut();
-}
-
-function autoSync(){
-  const tab=id=>document.getElementById('tab-'+id).style.display!=='none';
-  if(tab('c')) renderCommit();
-  if(tab('r')) renderRanking();
-  if(tab('f')) renderFines();
-  if(tab('a')) renderAttachments();
-}
-
-// ── ADMIN ──
-document.getElementById('adm-trigger').addEventListener('click',()=>{
-  tapCount++;clearTimeout(tapTimer);
-  tapTimer=setTimeout(()=>tapCount=0,2500);
-  if(tapCount>=5){tapCount=0;openOverlay();}
-});
-function openOverlay(){document.getElementById('pw-inp').value='';document.getElementById('pw-err').textContent='';document.getElementById('adm-overlay').classList.add('show');setTimeout(()=>document.getElementById('pw-inp').focus(),200);}
-function closeOverlay(){document.getElementById('adm-overlay').classList.remove('show');}
-function checkPw(){
-  if(document.getElementById('pw-inp').value.trim()===PASS){closeOverlay();openAdmin();}
-  else{document.getElementById('pw-err').textContent='كلمة السر غير صحيحة';document.getElementById('pw-inp').value='';}
-}
-async function openAdmin(){
-  // pdf url
-  const pdfUrl=await fbGet('config/pdfUrl')||DEFAULT_PDF;
-  const inp=document.getElementById('adm-pdf-url-inp');
-  if(inp) inp.value=pdfUrl;
-  const pdfCurEl=document.getElementById('adm-pdf-cur');
-  if(pdfCurEl) pdfCurEl.innerHTML=`<div class="cur-file"><div class="fdot"></div><div class="fnm">رابط محفوظ ✓</div></div>`;
-  // sheet url
-  const sheetUrl=await fbGet('config/sheetUrl')||'';
-  const sheetInp=document.getElementById('s-sheet-url');
-  if(sheetInp) sheetInp.value=sheetUrl;
-  // reminder
-  const reminder=await fbGet('config/reminder')||'';
-  document.getElementById('adm-reminder-inp').value=reminder;
-  // attachments
-  await loadAdmAttachments();
-  // agreements
-  const agreeText=await fbGet('config/agreements')||'';
-  document.getElementById('adm-agree-inp').value=agreeText;
-  // login alert
-  const alertText=await fbGet('config/loginAlert')||'';
-  document.getElementById('adm-alert-inp').value=alertText;
-  await renderAdmMembers();
-  document.getElementById('adm-panel').classList.add('show');
-}
-function closeAdmin(){document.getElementById('adm-panel').classList.remove('show');}
-
-// ── PDF VIEWER ──
-const DEFAULT_PDF='https://drive.google.com/file/d/1hwR62KhKVSmFFAd_nvedIHL1-wnynUsU/view?usp=drive_link';
-
-function driveViewToOpen(url){
-  // Convert drive view link to direct open link
-  const m=url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if(m) return `https://drive.google.com/file/d/${m[1]}/view`;
-  return url;
-}
-
-async function openPdfViewer(){
-  const savedUrl=await fbGet('config/pdfUrl')||DEFAULT_PDF;
-  const openUrl=driveViewToOpen(savedUrl);
-  window.open(openUrl,'_blank');
-}
-
-async function savePdfUrl(){
-  const url=document.getElementById('adm-pdf-url-inp').value.trim();
-  if(!url){setAdmPdfSt('الرجاء إدخال الرابط','err');return;}
-  await fbSet('config/pdfUrl',url);
-  setAdmPdfSt('✓ تم حفظ الرابط — سيظهر للجميع فوراً','ok');
-  document.getElementById('adm-pdf-cur').innerHTML=`<div class="cur-file"><div class="fdot"></div><div class="fnm">رابط محفوظ ✓</div></div>`;
-}
-
-function setAdmPdfSt(m,t){
-  const el=document.getElementById('adm-pdf-st');
-  if(el){el.style.display='block';el.className='st-msg '+(t||'');el.textContent=m;}
-}
-
-function closePdfViewer(){renderQuranTab();}
-
-
-function renderSegsPreview(){
-  const el=document.getElementById('segs-preview');el.style.display='flex';
-  el.innerHTML=seriesData.slice(0,8).map((s,i)=>`<div class="seg-prev-row"><div class="spn">${toAr(i+1)}</div><div class="spt">${s.title}</div><div class="spa">${s.ayat||''}</div></div>`).join('')+(seriesData.length>8?`<div style="text-align:center;font-size:11px;color:var(--tx2);padding:6px">... و${toAr(seriesData.length-8)} مقاطع أخرى</div>`:'');
-}
-
-async function renderAdmMembers(){
-  const members=await fbGet('members')||{};
-  const el=document.getElementById('adm-members');
-  const keys=Object.keys(members);
-  el.innerHTML=keys.length?keys.map(uid=>{
-    const m=members[uid];
-    const av=m.photo?`<img src="${m.photo}" class="madm-avatar" referrerpolicy="no-referrer">`:`<div class="madm-avatar" style="background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--green);font-weight:600;border-radius:50%;">${(m.name||'؟')[0]}</div>`;
-    return `<div class="madm-row">${av}<div class="madm-nm">${m.name||''}<br><span style="font-size:10px;color:var(--tx2)">${m.email||''}</span></div><button class="btn-rm" onclick="removeMember('${uid}')">✕</button></div>`;
-  }).join(''):'<div class="st-msg">لا يوجد أعضاء بعد</div>';
-}
-async function removeMember(uid){
-  await fbSet('members/'+uid,null);renderAdmMembers();
-}
-
-// ── SERIES ──
-// ── SERIES via Google Sheet ──
-async function saveSheetUrl(){
-  const url=document.getElementById('s-sheet-url').value.trim();
-  if(!url){setSerieSt('الرجاء إدخال الرابط','err');return;}
-  setSerieSt('جاري قراءة البيانات...','');
-  try{
-    const data=await fetchSheetData(url);
-    if(!data.length){setSerieSt('لم يُعثر على بيانات — تأكد من أعمدة title, ayat, link','err');return;}
-    seriesData=data;
-    await fbSet('series',data);
-    await fbSet('config/sheetUrl',url);
-    // auto-add to attachments
-    await fbSet('attachments/series_main',{name:'سلسلة التفسير كاملة',url,updatedAt:Date.now()});
-    setSerieSt('✓ '+toAr(data.length)+' مقطع — تمت المشاركة مع الجميع','ok');
-  }catch(e){setSerieSt('خطأ: '+e.message,'err');}
-}
-function setSerieSt(m,t){const el=document.getElementById('s-st');el.style.display='block';el.className='st-msg '+(t||'');el.textContent=m;}
-
-async function fetchSheetData(url){
-  const m=url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if(!m) throw new Error('رابط غير صحيح');
-  const id=m[1];
-  const tsvUrl=`https://docs.google.com/spreadsheets/d/${id}/export?format=tsv`;
-  const res=await fetch(tsvUrl);
-  if(!res.ok) throw new Error('تعذّر قراءة الشيت — تأكد أنه مشارك للعموم');
-  const text=await res.text();
-  const lines=text.split('\n').filter(l=>l.trim());
-  const headers=lines[0].split('\t').map(h=>h.trim().toLowerCase());
-  return lines.slice(1).map((l,i)=>{
-    const cols=l.split('\t').map(c=>c.trim());
-    const obj={};headers.forEach((h,j)=>obj[h]=cols[j]||'');
-    return {
-      id:i,
-      title:obj.title||obj['عنوان']||obj['اسم المقطع']||'مقطع '+(i+1),
-      ayat:obj.ayat||obj['آيات']||'',
-      link:obj.link||obj['رابط']||obj.url||''
-    };
-  }).filter(r=>r.title);
-}
-
-async function loadSeries(){
-  const fb=await fbGet('series');
-  if(fb&&fb.length){seriesData=fb;}
-}
-
-// ── ATTACHMENTS ──
-let attachmentRows=[];
-
-function addAttachmentRow(name='',url='',key=''){
-  const rowId='att-row-'+Date.now();
-  attachmentRows.push({rowId,key});
-  const el=document.getElementById('adm-att-list');
-  const div=document.createElement('div');
-  div.id=rowId;
-  div.style.cssText='display:flex;flex-direction:column;gap:6px;background:var(--sur2);border-radius:10px;padding:10px;border:.5px solid var(--bd);';
-  div.innerHTML=`
-    <div style="display:flex;align-items:center;gap:8px;">
-      <input class="inp" type="text" placeholder="الاسم (مثال: سلسلة التفسير)" value="${name}" style="flex:1;margin:0;" id="${rowId}-name">
-      <button onclick="saveAttachmentRow('${rowId}','${key}')" style="background:var(--green);border:none;border-radius:8px;padding:7px 12px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;color:#E1F5EE;cursor:pointer;white-space:nowrap;min-height:36px;">💾 حفظ</button>
-      <button onclick="deleteAttachmentRow('${rowId}','${key}')" style="background:none;border:none;color:var(--red);font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
-    </div>
-    <input class="inp" type="text" placeholder="الرابط https://..." value="${url}" style="margin:0;" id="${rowId}-url">`;
-  el.appendChild(div);
-  setTimeout(()=>document.getElementById(rowId+'-name').focus(),100);
-}
-
-async function saveAttachmentRow(rowId,existingKey){
-  const name=document.getElementById(rowId+'-name')?.value.trim();
-  const url=document.getElementById(rowId+'-url')?.value.trim();
-  if(!name){setAdmAttSt('الرجاء إدخال الاسم','err');return;}
-  const key=existingKey||'att_'+Date.now();
-  await fbSet('attachments/'+key,{name,url:url||'',updatedAt:Date.now()});
-  setAdmAttSt('✓ تم الحفظ','ok');
-}
-
-async function deleteAttachmentRow(rowId,key){
-  if(key) await fbSet('attachments/'+key,null);
-  document.getElementById(rowId)?.remove();
-  setAdmAttSt('✓ تم الحذف','ok');
-}
-
-function setAdmAttSt(m,t){const el=document.getElementById('adm-att-st');if(el){el.style.display='block';el.className='st-msg '+(t||'');el.textContent=m;}}
-
-async function loadAdmAttachments(){
-  const attachments=await fbGet('attachments')||{};
-  document.getElementById('adm-att-list').innerHTML='';
-  attachmentRows=[];
-  Object.keys(attachments).sort().forEach(k=>{
-    addAttachmentRow(attachments[k].name,attachments[k].url||'',k);
-  });
-}
-async function removeAttachment(k){await fbSet('attachments/'+k,null);loadAdmAttachments();}
-
-
-// ── DEADLINE ──
-function getNextSatFajr(){
-  const d=new Date();const days=(6-d.getDay()+7)%7||7;
-  d.setDate(d.getDate()+days);d.setHours(4,30,0,0);return d;
-}
-function updateDeadline(){
-  const diff=getNextSatFajr()-new Date();
-  if(diff<=0){document.getElementById('dl-badge').textContent='⚠️ انتهت';return;}
-  const days=Math.floor(diff/86400000);
-  const hrs=Math.floor((diff%86400000)/3600000);
-  const mins=Math.floor((diff%3600000)/60000);
-  document.getElementById('dl-badge').textContent='⏳ '+(days?toAr(days)+'ي ':'')+toAr(hrs)+':'+String(mins).padStart(2,'0');
-}
-
-// ── COMMITMENTS ──
-async function renderCommit(){
-  const el=document.getElementById('commit-cnt');
-  el.innerHTML='<div class="empty">جاري التحميل...</div>';
-  const wrecords=await fbGet('wrecords')||{};
-  const progress=await fbGet('progress')||{};
-  const weekType=await fbGet('config/weekType')||'hifz';
-  const uid=currentUser.uid;
-  const myWRec=wrecords[uid]||{};
-  let html='';
-
-  const diff=getNextSatFajr()-new Date();
-  const days=Math.floor(diff/86400000);const hrs=Math.floor((diff%86400000)/3600000);
-  const typeLabel=weekType==='hifz'?'📖 أسبوع حفظ':'🔄 أسبوع مراجعة';
-  html+=`<div class="week-info"><div class="wi-top"><div class="wi-title">${typeLabel}</div><div class="wi-dl">⏳ ${days?toAr(days)+'ي ':''} ${toAr(hrs)}س — فجر السبت</div></div><div class="wi-sub">${weekType==='hifz'?'المطلوب: سماع مقطع + التسميع ٣ مرات · الغرامة: <strong>٥٠ جنيه</strong>':'المطلوب: مراجعة المقاطع المحفوظة + تسميع مرة · الغرامة: <strong>٥٠ جنيه</strong>'}</div></div>`;
-
-  if(weekType==='hifz'){
-    html+=await renderHifzSection(uid,progress,myWRec);
-  } else {
-    html+=await renderMuraja3aSection(uid,progress,myWRec);
-  }
-
-  el.innerHTML=html;
-}
-
-async function renderHifzSection(uid,progress,myWRec){
-  const myProg=progress[uid]!==undefined?Number(progress[uid]):-1;
-  const mySegIdx=myProg+1;
-  const mySeg=seriesData[mySegIdx];
-  let html='';
-
-  if(!seriesData.length){
-    return `<div class="empty" style="background:var(--sur);border-radius:14px;border:.5px solid var(--bd);">لا توجد سلسلة بعد<br><small>ينتظر المشرف رفع الملف</small></div>`;
-  } else if(mySegIdx>=seriesData.length){
-    return `<div class="seg-card"><div class="seg-hdr"><div class="seg-lbl">🎉 ما شاء الله!</div><div class="seg-title">أتممت السلسلة كاملة</div></div></div>`;
-  }
-
-  html+=`<div class="seg-card"><div class="seg-hdr">
-    <div class="seg-lbl">المقطع التالي · ${toAr(mySegIdx+1)} من ${toAr(seriesData.length)}</div>
-    <div class="seg-title">${mySeg.title}</div>
-    ${mySeg.ayat?`<div class="seg-ayat">الآيات: ${mySeg.ayat}</div>`:''}
-    ${mySeg.link?`<button class="seg-link-btn" onclick="window.open('${mySeg.link}','_blank')">▶ استمع للمقطع</button>`:''}
-  </div>
-  <div class="tasks-grid">
-    <div class="task-row"><div class="task-label">السماع<small>استمع للمقطع كاملاً</small></div><div class="toggle-wrap"><button class="tog-btn${myWRec.listen==='done'?' done':''}" onclick="setTask('listen','done')">تم</button><button class="tog-btn${myWRec.listen==='fail'?' fail':''}" onclick="setTask('listen','fail')">لم يتم</button></div></div>
-    <div class="task-row"><div class="task-label">التسميع الأول</div><div class="toggle-wrap"><button class="tog-btn${myWRec.rec1==='done'?' done':''}" onclick="setTask('rec1','done')">تم</button><button class="tog-btn${myWRec.rec1==='fail'?' fail':''}" onclick="setTask('rec1','fail')">لم يتم</button></div></div>
-    <div class="task-row"><div class="task-label">التسميع الثاني</div><div class="toggle-wrap"><button class="tog-btn${myWRec.rec2==='done'?' done':''}" onclick="setTask('rec2','done')">تم</button><button class="tog-btn${myWRec.rec2==='fail'?' fail':''}" onclick="setTask('rec2','fail')">لم يتم</button></div></div>
-    <div class="task-row"><div class="task-label">التسميع الثالث</div><div class="toggle-wrap"><button class="tog-btn${myWRec.rec3==='done'?' done':''}" onclick="setTask('rec3','done')">تم</button><button class="tog-btn${myWRec.rec3==='fail'?' fail':''}" onclick="setTask('rec3','fail')">لم يتم</button></div></div>
-  </div>
-  ${allDone(myWRec)?`<div class="seg-nav"><button class="seg-nav-btn" onclick="completeSegment(${mySegIdx})">✓ أتممت هذا المقطع — انتقل للتالي</button></div>`:''}</div>`;
-  return html;
-}
-
-async function renderMuraja3aSection(uid,progress,myWRec){
-  // Load member's segment table: {seg_0: {memorized, reviewed}, ...}
-  const segTable=await fbGet('memberSegs/'+uid)||{};
-
-  // segments to review = memorized AND NOT reviewed
-  const toReview=[];
-  for(const key of Object.keys(segTable)){
-    const s=segTable[key];
-    if(s.memorized&&!s.reviewed){
-      const idx=parseInt(key.replace('seg_',''));
-      if(seriesData[idx]) toReview.push(idx);
-    }
-  }
-  toReview.sort((a,b)=>a-b);
-
-  const mur=myWRec.muraja3a||{};
-  const allReviewed=toReview.length>0&&toReview.every(i=>mur['seg_'+i]==='done');
-  const skipped=myWRec.skippedExtra===true;
-  const hasExtra=myWRec.extraHifzIdx!==undefined;
-
-  let html='';
-
-  if(!toReview.length){
-    html+=`<div class="seg-card" style="border-color:var(--green);">
-      <div class="seg-hdr" style="background:var(--gl);">
-        <div class="seg-lbl">✅ أتممت المراجعة!</div>
-        <div class="seg-title">راجعت كل ما حفظته</div>
-      </div>
-      <div style="padding:16px;text-align:center;">
-        <div style="font-size:14px;color:var(--tx);margin-bottom:14px;">هل تريد حفظ مقطع جديد هذا الأسبوع؟</div>
-        <div style="display:flex;gap:10px;">
-          <button onclick="addExtraHifz()" style="flex:1;background:var(--green);border:none;border-radius:10px;padding:11px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;color:#E1F5EE;cursor:pointer;">نعم، أضف مقطعاً</button>
-          <button onclick="skipExtraHifz()" style="flex:1;background:var(--sur2);border:.5px solid var(--bd2);border-radius:10px;padding:11px;font-family:'Cairo',sans-serif;font-size:13px;color:var(--tx2);cursor:pointer;">لا، شكراً</button>
-        </div>
-      </div>
-    </div>`;
-  } else {
-    html+=`<div class="seg-card"><div class="seg-hdr" style="background:var(--bl);">
-      <div class="seg-lbl" style="color:var(--blue);">مقاطع المراجعة — ${toAr(toReview.length)} مقطع</div>
-      <div class="seg-title" style="color:var(--blue);">سمّع كل مقطع مرة واحدة</div>
-    </div>
-    <div class="tasks-grid">`;
-
-    toReview.forEach(i=>{
-      const seg=seriesData[i];
-      const status=mur['seg_'+i];
-      html+=`<div class="task-row">
-        <div class="task-label">${seg.title}<small>${seg.ayat||''}</small></div>
-        <div class="toggle-wrap">
-          <button class="tog-btn${status==='done'?' done':''}" onclick="setMuraja3a(${i},'done')">تم</button>
-          <button class="tog-btn${status==='fail'?' fail':''}" onclick="setMuraja3a(${i},'fail')">لم يتم</button>
-        </div>
-      </div>`;
+function loadUserData(user) {
+    const userRef = db.ref('hifz_users_data/' + user.uid);
+    userRef.on('value', (snapshot) => {
+        const data = snapshot.val() || { fines: 0, doneCount: 0 };
+        document.getElementById('stats-msg').innerText = `المنجز: ${data.doneCount || 0} | الغرامات: ${data.fines || 0} ج`;
     });
+}
 
-    html+=`</div>
-    ${allReviewed&&!skipped&&!hasExtra?`
-      <div style="padding:14px 16px;border-top:.5px solid var(--bd);">
-        <div style="font-size:14px;font-weight:600;color:var(--tx);margin-bottom:12px;text-align:center;">🎉 أتممت المراجعة! هل تريد حفظ مقطع جديد؟</div>
-        <div style="display:flex;gap:10px;">
-          <button onclick="addExtraHifz()" style="flex:1;background:var(--green);border:none;border-radius:10px;padding:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;color:#E1F5EE;cursor:pointer;">نعم، أضف مقطعاً</button>
-          <button onclick="skipExtraHifz()" style="flex:1;background:var(--sur2);border:.5px solid var(--bd2);border-radius:10px;padding:12px;font-family:'Cairo',sans-serif;font-size:13px;color:var(--tx2);cursor:pointer;">لا، شكراً</button>
-        </div>
-      </div>`:allReviewed&&skipped?`<div style="padding:12px 16px;border-top:.5px solid var(--bd);text-align:center;font-size:13px;color:var(--green);">✓ أتممت المراجعة</div>`:''}</div>`;
-
-    // extra hifz option if completed
-    if(myWRec.extraHifzIdx!==undefined){
-      const extra=seriesData[myWRec.extraHifzIdx];
-      if(extra){
-        const ew=myWRec.extraHifz||{};
-        html+=`<div class="seg-card" style="margin-top:4px;">
-          <div class="seg-hdr"><div class="seg-lbl">📖 إضافي — حفظ مقطع جديد</div><div class="seg-title">${extra.title}</div>${extra.link?`<button class="seg-link-btn" onclick="window.open('${extra.link}','_blank')">▶ استمع</button>`:''}</div>
-          <div class="tasks-grid">
-            <div class="task-row"><div class="task-label">السماع</div><div class="toggle-wrap"><button class="tog-btn${ew.listen==='done'?' done':''}" onclick="setExtraTask('listen','done')">تم</button><button class="tog-btn${ew.listen==='fail'?' fail':''}" onclick="setExtraTask('listen','fail')">لم يتم</button></div></div>
-            <div class="task-row"><div class="task-label">التسميع الأول</div><div class="toggle-wrap"><button class="tog-btn${ew.rec1==='done'?' done':''}" onclick="setExtraTask('rec1','done')">تم</button><button class="tog-btn${ew.rec1==='fail'?' fail':''}" onclick="setExtraTask('rec1','fail')">لم يتم</button></div></div>
-            <div class="task-row"><div class="task-label">التسميع الثاني</div><div class="toggle-wrap"><button class="tog-btn${ew.rec2==='done'?' done':''}" onclick="setExtraTask('rec2','done')">تم</button><button class="tog-btn${ew.rec2==='fail'?' fail':''}" onclick="setExtraTask('rec2','fail')">لم يتم</button></div></div>
-            <div class="task-row"><div class="task-label">التسميع الثالث</div><div class="toggle-wrap"><button class="tog-btn${ew.rec3==='done'?' done':''}" onclick="setExtraTask('rec3','done')">تم</button><button class="tog-btn${ew.rec3==='fail'?' fail':''}" onclick="setExtraTask('rec3','fail')">لم يتم</button></div></div>
-          </div>
-          ${allDone(ew)?`<div class="seg-nav"><button class="seg-nav-btn" onclick="completeExtraSegment(${myWRec.extraHifzIdx})">✓ أتممت الحفظ الإضافي</button></div>`:''}</div>`;
-      }
+function checkAdmin() {
+    const pin = prompt("أدخل رمز الإدارة:");
+    if(pin === "1234") {
+        alert("مرحباً بك في لوحة الإدارة (قيد التطوير)");
     }
-  }
-  return html;
 }
-
-async function setMuraja3a(segIdx,val){
-  const uid=currentUser.uid;
-  const cur=await fbGet('wrecords/'+uid)||{};
-  if(!cur.muraja3a) cur.muraja3a={};
-  if(cur.muraja3a['seg_'+segIdx]===val) delete cur.muraja3a['seg_'+segIdx];
-  else cur.muraja3a['seg_'+segIdx]=val;
-  await fbSet('wrecords/'+uid,cur);
-  renderCommit();
-}
-
-async function skipExtraHifz(){
-  // mark as declined extra hifz this week
-  const uid=currentUser.uid;
-  const cur=await fbGet('wrecords/'+uid)||{};
-  cur.skippedExtra=true;
-  await fbSet('wrecords/'+uid,cur);
-  renderCommit();
-}
-
-async function addExtraHifz(){
-  const uid=currentUser.uid;
-  const progress=await fbGet('progress')||{};
-  const myProg=progress[uid]!==undefined?Number(progress[uid]):-1;
-  const nextIdx=myProg+1;
-  if(nextIdx>=seriesData.length){alert('أتممت السلسلة كاملة!');return;}
-  const cur=await fbGet('wrecords/'+uid)||{};
-  cur.extraHifzIdx=nextIdx;
-  cur.extraHifz={};
-  await fbSet('wrecords/'+uid,cur);
-  renderCommit();
-}
-
-async function setExtraTask(task,val){
-  const uid=currentUser.uid;
-  const cur=await fbGet('wrecords/'+uid)||{};
-  if(!cur.extraHifz) cur.extraHifz={};
-  if(cur.extraHifz[task]===val) delete cur.extraHifz[task];
-  else cur.extraHifz[task]=val;
-  await fbSet('wrecords/'+uid,cur);
-  renderCommit();
-}
-
-async function completeExtraSegment(segIdx){
-  const uid=currentUser.uid;
-  const seg=seriesData[segIdx];
-  const fullTitle=seg?(seg.title+(seg.ayat?' — '+seg.ayat:'')):('مقطع '+(segIdx+1));
-  // mark memorized — reviewed:true so it does NOT appear this week for review
-  // it will appear in NEXT muraja3a week (we set reviewed:false after resetWeek)
-  await fbSet('memberSegs/'+uid+'/seg_'+segIdx,{
-    memorized:true,reviewed:true,
-    title:fullTitle,memorizedAt:Date.now(),
-    pendingReview:true // flag to reset reviewed=false on next muraja3a week
-  });
-  await fbSet('progress/'+uid,segIdx);
-  const cur=await fbGet('wrecords/'+uid)||{};
-  delete cur.extraHifzIdx;delete cur.extraHifz;
-  cur.extraCompletedTitle=fullTitle;
-  await fbSet('wrecords/'+uid,cur);
-  renderCommit();
-}
-
-// ── FINES ──
-async function renderFines(){
-  const el=document.getElementById('fines-cnt');
-  el.innerHTML='<div class="empty">جاري التحميل...</div>';
-  const members=await fbGet('members')||{};
-  const wrecords=await fbGet('wrecords')||{};
-  const cumulative=await fbGet('finesCumulative')||{};
-  const history=await fbGet('finesHistory')||{};
-  const memberKeys=Object.keys(members);
-  let html='';
-
-  const grandTotal=Object.values(cumulative).reduce((s,v)=>s+Number(v),0);
-  let currentWeekTotal=0;
-  memberKeys.forEach(muid=>{
-    const wr=wrecords[muid]||{};
-    if(!allDone(wr)&&(wr.listen==='fail'||wr.rec1==='fail'||wr.rec2==='fail'||wr.rec3==='fail')) currentWeekTotal+=50;
-  });
-
-  html+=`<div class="fines-summary"><div class="fines-summary-title">إجمالي الغرامات المتراكمة</div><div class="fines-summary-total">${toAr(grandTotal+currentWeekTotal)} جنيه</div><div class="fines-summary-sub">من بداية الدورة حتى الآن</div></div>`;
-
-  html+=`<div class="week-fines-card"><div class="wfc-header"><span class="wfc-week">الأسبوع الحالي</span><span class="wfc-total">${toAr(currentWeekTotal)} جنيه</span></div>`;
-  memberKeys.forEach(muid=>{
-    const m=members[muid];if(!m)return;
-    const wr=wrecords[muid]||{};
-    const done=allDone(wr);
-    const anyFail=wr.listen==='fail'||wr.rec1==='fail'||wr.rec2==='fail'||wr.rec3==='fail';
-    const weekFine=anyFail&&!done?50:0;
-    const totalFine=(cumulative[muid]||0)+weekFine;
-    const tasks=[];
-    if(wr.listen==='fail')tasks.push('السماع');
-    if(wr.rec1==='fail')tasks.push('تسميع١');
-    if(wr.rec2==='fail')tasks.push('تسميع٢');
-    if(wr.rec3==='fail')tasks.push('تسميع٣');
-    const av=m.photo?`<img src="${m.photo}" class="fmr-avatar" referrerpolicy="no-referrer">`:`<div class="fmr-avatar-ph">${(m.name||'؟')[0]}</div>`;
-    html+=`<div class="fine-member-row">${av}<div class="fmr-info"><div class="fmr-name">${m.name||''}${muid===currentUser.uid?' (أنت)':''}</div><div class="fmr-detail">${tasks.length?'لم يتم: '+tasks.join('، '):(done?'مكتمل ✓':'لم يسجّل بعد')}</div></div><div class="fmr-amounts">${weekFine?`<div class="fmr-week-fine">${toAr(weekFine)} جنيه</div>`:`<div class="fmr-ok">${done?'✓ معفى':'—'}</div>`}<div class="fmr-total-fine">تراكمي: ${toAr(totalFine)} جنيه</div></div></div>`;
-  });
-  html+=`</div>`;
-
-  const histKeys=Object.keys(history).sort((a,b)=>b.localeCompare(a));
-  histKeys.forEach(wk=>{
-    const week=history[wk];
-    const weekTotal=Object.values(week.fines||{}).reduce((s,v)=>s+Number(v),0);
-    html+=`<div class="week-fines-card"><div class="wfc-header"><span class="wfc-week">${week.label}</span><span class="wfc-total">${toAr(weekTotal)} جنيه</span></div>`;
-    Object.keys(week.fines||{}).forEach(muid=>{
-      const m=members[muid]||{name:muid};
-      const fine=Number(week.fines[muid]);
-      const av=m.photo?`<img src="${m.photo}" class="fmr-avatar" referrerpolicy="no-referrer">`:`<div class="fmr-avatar-ph">${(m.name||'؟')[0]}</div>`;
-      html+=`<div class="fine-member-row">${av}<div class="fmr-info"><div class="fmr-name">${m.name||''}</div></div><div class="fmr-amounts">${fine?`<div class="fmr-week-fine">${toAr(fine)} جنيه</div>`:`<div class="fmr-ok">✓ معفى</div>`}</div></div>`;
-    });
-    html+=`</div>`;
-  });
-
-  if(memberKeys.length) html+=`<div class="grand-total-row"><span class="gt-label">المجموع الكلي للدورة</span><span class="gt-amount">${toAr(grandTotal+currentWeekTotal)} جنيه</span></div>`;
-  el.innerHTML=html;
-}
-
-function allDone(rec){return rec.listen==='done'&&rec.rec1==='done'&&rec.rec2==='done'&&rec.rec3==='done';}
-
-async function setTask(task,val){
-  const uid=currentUser.uid;
-  const cur=await fbGet('wrecords/'+uid)||{};
-  // if already selected same value → deselect (remove)
-  if(cur[task]===val){
-    delete cur[task];
-  } else {
-    cur[task]=val;
-  }
-  await fbSet('wrecords/'+uid,cur);
-  renderCommit();
-}
-async function completeSegment(segIdx){
-  const uid=currentUser.uid;
-  const seg=seriesData[segIdx];
-  const fullTitle=seg?(seg.title+(seg.ayat?' — '+seg.ayat:'')):('مقطع '+(segIdx+1));
-  // update memberSegs table
-  await fbSet('memberSegs/'+uid+'/seg_'+segIdx,{
-    memorized:true,reviewed:false,
-    title:fullTitle,memorizedAt:Date.now()
-  });
-  await fbSet('progress/'+uid,segIdx);
-  // keep existing wrecords tasks (for fines) but add completedSegTitle
-  const cur=await fbGet('wrecords/'+uid)||{};
-  cur.completedSegTitle=fullTitle;
-  cur.completedSegIdx=segIdx;
-  await fbSet('wrecords/'+uid,cur);
-  renderCommit();
-}
-
-async function resetWeek(){
-  // Show choice dialog
-  const choice=await showWeekTypeDialog();
-  if(!choice) return;
-
-  const wrecords=await fbGet('wrecords')||{};
-  const members=await fbGet('members')||{};
-  const progress=await fbGet('progress')||{};
-  const weekNum=((await fbGet('weekCount'))||0)+1;
-  const weekType=choice; // 'hifz' or 'muraja3a'
-  const weekLabel=(weekType==='hifz'?'أسبوع حفظ ':'أسبوع مراجعة ')+toAr(weekNum)+' — '+new Date().toLocaleDateString('ar-EG');
-
-  // archive fines and week data
-  const weekFines={};
-  const weekHifz={};
-  const weekMuraja3a={};
-
-  for(const muid of Object.keys(members)){
-    const m=members[muid];
-    const wr=wrecords[muid]||{};
-
-    if(weekType==='hifz'){
-      const hifzDone=wr.completedSegTitle!==undefined;
-      const anyFail=wr.listen==='fail'||wr.rec1==='fail'||wr.rec2==='fail'||wr.rec3==='fail';
-      weekFines[muid]=!hifzDone?50:0;
-      weekHifz[muid]=wr.completedSegTitle||'لم يُتمّ';
-    } else {
-      const mur=wr.muraja3a||{};
-      const reviewedIndices=Object.keys(mur).filter(k=>mur[k]==='done').map(k=>parseInt(k.replace('seg_','')));
-      // mark reviewed segments in memberSegs
-      for(const i of reviewedIndices){
-        await fbUpdate('memberSegs/'+muid+'/seg_'+i,{reviewed:true,reviewedAt:Date.now()});
-      }
-      // reset pendingReview segments (extra hifz from prev muraja3a) to reviewed:false
-      const segs=await fbGet('memberSegs/'+muid)||{};
-      for(const key of Object.keys(segs)){
-        if(segs[key].pendingReview){
-          await fbUpdate('memberSegs/'+muid+'/'+key,{reviewed:false,pendingReview:false});
-        }
-      }
-      const anyFail=Object.values(mur).some(v=>v==='fail');
-      const allDoneMur=reviewedIndices.length>0&&Object.values(mur).every(v=>v==='done');
-      weekFines[muid]=anyFail&&!allDoneMur?50:0;
-      const reviewedTitles=[];
-      for(const i of reviewedIndices){
-        const seg=seriesData[i];
-        reviewedTitles.push(seg?(seg.title+(seg.ayat?' — '+seg.ayat:'')):('مقطع '+(i+1)));
-      }
-      if(reviewedTitles.length) weekMuraja3a[muid]=reviewedTitles.join('، ');
-      if(wr.extraCompletedTitle) weekHifz[muid]=wr.extraCompletedTitle;
-    }
-  }
-
-  await fbSet('finesHistory/week'+weekNum,{
-    label:weekLabel,type:weekType,
-    fines:weekFines,hifz:weekHifz,muraja3a:weekMuraja3a,
-    createdAt:Date.now()
-  });
-
-  // update cumulative fines
-  const cumulative=await fbGet('finesCumulative')||{};
-  Object.keys(weekFines).forEach(muid=>{cumulative[muid]=(cumulative[muid]||0)+weekFines[muid];});
-  await fbSet('finesCumulative',cumulative);
-  await fbSet('weekCount',weekNum);
-  await fbSet('config/weekType',weekType);
-  await fbSet('wrecords',{});
-
-  const el=document.getElementById('reset-st');
-  el.style.display='block';el.className='st-msg ok';
-  el.textContent='✓ بدأ '+(weekType==='hifz'?'أسبوع حفظ':'أسبوع مراجعة')+' جديد';
-  renderCommit();renderFines();
-}
-
-function showWeekTypeDialog(){
-  return new Promise(res=>{
-    window.__weekRes=res;
-    const overlay=document.createElement('div');
-    overlay.id='week-type-overlay';
-    overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px;';
-    overlay.innerHTML=`
-      <div style="background:var(--sur);border-radius:20px;padding:28px 22px;width:100%;max-width:320px;text-align:center;">
-        <div style="font-family:'Amiri',serif;font-size:20px;color:var(--tx);margin-bottom:8px;">نوع الأسبوع الجديد</div>
-        <div style="font-size:13px;color:var(--tx2);margin-bottom:22px;">اختر نوع الأسبوع القادم</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <button onclick="closeWeekDialog('hifz')" style="background:var(--gl);border:.5px solid var(--green);border-radius:12px;padding:14px;font-family:'Cairo',sans-serif;font-size:15px;font-weight:600;color:var(--green);cursor:pointer;">
-            📖 أسبوع حفظ<div style="font-size:11px;font-weight:400;margin-top:3px;opacity:.8;">مقطع جديد + سماع + تسميع ٣ مرات</div>
-          </button>
-          <button onclick="closeWeekDialog('muraja3a')" style="background:var(--bl);border:.5px solid var(--blue);border-radius:12px;padding:14px;font-family:'Cairo',sans-serif;font-size:15px;font-weight:600;color:var(--blue);cursor:pointer;">
-            🔄 أسبوع مراجعة<div style="font-size:11px;font-weight:400;margin-top:3px;opacity:.8;">مراجعة المحفوظ السابق + تسميع مرة</div>
-          </button>
-          <button onclick="closeWeekDialog(null)" style="background:none;border:.5px solid var(--bd2);border-radius:12px;padding:10px;font-family:'Cairo',sans-serif;font-size:13px;color:var(--tx2);cursor:pointer;">إلغاء</button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-  });
-}
-
-function closeWeekDialog(val){
-  const overlay=document.getElementById('week-type-overlay');
-  if(overlay) document.body.removeChild(overlay);
-  if(window.__weekRes){window.__weekRes(val);window.__weekRes=null;}
-}
-
-
-async function clearHistory(){
-  if(!confirm('تحذير: سيُمسح كل السجل التاريخي (الأسابيع، الغرامات، التقدم، المراجعات).\nهذا لا يُعاد — هل أنت متأكد؟')) return;
-  if(!confirm('تأكيد ثانٍ: هل تريد المسح الكامل؟')) return;
-  await fbSet('finesHistory',null);
-  await fbSet('finesCumulative',null);
-  await fbSet('wrecords',null);
-  await fbSet('progress',null);
-  await fbSet('reviewedSegments',null);
-  await fbSet('completedSegments',null);
-  await fbSet('memberSegs',null);
-  await fbSet('weekCount',0);
-  await fbSet('config/weekType','hifz');
-  const el=document.getElementById('clear-st');
-  el.style.display='block';el.className='st-msg ok';
-  el.textContent='✓ تم مسح السجل — التطبيق جاهز للبدء من صفر';
-}
-
-async function exportCSV(){
-  const members=await fbGet('members')||{};
-  const history=await fbGet('finesHistory')||{};
-  const weeks=Object.keys(history).sort();
-
-  let csv='الأسبوع,النوع,رقم المشترك,الاسم,ما تم حفظه,ما تم مراجعته,الغرامة\n';
-  weeks.forEach(wk=>{
-    const w=history[wk];
-    const type=w.type==='hifz'?'حفظ':'مراجعة';
-    Object.keys(members).forEach(muid=>{
-      const m=members[muid];
-      const fine=w.fines?.[muid]||0;
-      const hifz=w.hifz?.[muid]||'—';
-      const mur=w.muraja3a?.[muid]||'—';
-      csv+=`"${w.label}","${type}",${m.memberNum||''},"${m.name||''}","${hifz}","${mur}",${fine}\n`;
-    });
-  });
-
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='hifz_report_'+new Date().toLocaleDateString('ar-EG').replace(/\//g,'-')+'.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function switchTab(t){
-  ['q','c','r','f','a','g','p'].forEach(id=>{
-    const tab=document.getElementById('tab-'+id);
-    const nav=document.getElementById('nav-'+id);
-    if(tab) tab.style.display=id===t?'flex':'none';
-    if(nav) nav.classList.toggle('active',id===t);
-  });
-  if(t==='q') renderQuranTab();
-  if(t==='c') renderCommit();
-  if(t==='r') renderRanking();
-  if(t==='f') renderFines();
-  if(t==='a') renderAttachments();
-  if(t==='g') renderAgreements();
-  if(t==='p') renderProfile();
-}
-
-async function renderAgreements(){
-  const el=document.getElementById('agree-cnt');
-  const text=await fbGet('config/agreements')||'';
-  if(!text){
-    el.innerHTML=`<div class="empty">لا توجد اتفاقيات بعد<br><small style="font-size:13px;">ينتظر المشرف إضافتها</small></div>`;
-    return;
-  }
-  el.innerHTML=`
-    <div style="background:var(--sur);border:.5px solid var(--bd);border-radius:14px;padding:20px;">
-      <div style="font-family:'Amiri',serif;font-size:20px;color:var(--tx);margin-bottom:14px;padding-bottom:10px;border-bottom:.5px solid var(--bd);">📜 اتفاقيات الحلقة</div>
-      <div style="font-size:14px;color:var(--tx);line-height:2;white-space:pre-wrap;">${text}</div>
-    </div>`;
-}
-
-async function saveAgreements(){
-  const txt=document.getElementById('adm-agree-inp').value.trim();
-  if(!txt){setAdmAgreeSt('الرجاء إدخال نص','err');return;}
-  await fbSet('config/agreements',txt);
-  setAdmAgreeSt('✓ تم حفظ الاتفاقيات','ok');
-}
-function setAdmAgreeSt(m,t){const el=document.getElementById('adm-agree-st');el.style.display='block';el.className='st-msg '+(t||'');el.textContent=m;}
-
-async function saveLoginAlert(){
-  const txt=document.getElementById('adm-alert-inp').value.trim();
-  await fbSet('config/loginAlert',txt);
-  setAdmAlertSt('✓ تم حفظ التنبيه','ok');
-}
-function setAdmAlertSt(m,t){const el=document.getElementById('adm-alert-st');el.style.display='block';el.className='st-msg '+(t||'');el.textContent=m;}
-
-async function renderQuranTab(){
-  const el=document.getElementById('quran-main-cnt');
-  const reminder=await fbGet('config/reminder')||'تذكير: حمّل المصحف من الرابط وافتحه بتطبيق PDF من جهازك';
-  el.innerHTML=`
-    <div style="background:linear-gradient(135deg,var(--gl),#d4f0e5);border-radius:16px;padding:24px;text-align:center;">
-      <div style="font-family:'Amiri',serif;font-size:22px;color:var(--green);margin-bottom:6px;">القرآن الكريم</div>
-      <div style="font-size:13px;color:var(--tx2);margin-bottom:18px;line-height:1.7;">اضغط لفتح المصحف في تطبيق PDF</div>
-      <button class="pdf-open-btn" onclick="openPdfViewer()" style="max-width:220px;margin:0 auto;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
-        فتح المصحف
-      </button>
-    </div>
-    <div style="background:var(--goldl);border:.5px solid #FAC775;border-radius:12px;padding:16px;display:flex;align-items:flex-start;gap:10px;">
-      <span style="font-size:20px;flex-shrink:0;">📌</span>
-      <div style="font-size:16px;font-weight:500;color:var(--gold);line-height:1.9;font-family:'Cairo',sans-serif;">${reminder}</div>
-    </div>`;
-}
-
-async function renderRanking(){
-  const el=document.getElementById('rank-cnt');
-  el.innerHTML='<div class="empty">جاري التحميل...</div>';
-  const members=await fbGet('members')||{};
-  const wrecords=await fbGet('wrecords')||{};
-  const progress=await fbGet('progress')||{};
-  const memberKeys=Object.keys(members);
-  if(!memberKeys.length){el.innerHTML='<div class="empty">لا يوجد أعضاء بعد</div>';return;}
-
-  const sorted=[...memberKeys].sort((a,b)=>(progress[b]!==undefined?Number(progress[b]):-1)-(progress[a]!==undefined?Number(progress[a]):-1));
-  let html=`<div class="board-card"><div class="board-hdr"><span class="board-title">ترتيب المجموعة</span><span class="pill pill-partial">${toAr(memberKeys.length)} أعضاء</span></div>`;
-  sorted.forEach((muid,rank)=>{
-    const m=members[muid];if(!m)return;
-    const mp=progress[muid]!==undefined?Number(progress[muid]):-1;
-    const mwr=wrecords[muid]||{};
-    const done=allDone(mwr);
-    const anyFail=mwr.listen==='fail'||mwr.rec1==='fail'||mwr.rec2==='fail'||mwr.rec3==='fail';
-    const pillCls=done?'pill-done':anyFail?'pill-fail':Object.keys(mwr).length?'pill-partial':'pill-none';
-    const pillTxt=done?'✓ مكتمل':anyFail?'غرامة':Object.keys(mwr).length?'جاري':'لم يبدأ';
-    const rankIcon=rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':toAr(rank+1);
-    const av=m.photo?`<img src="${m.photo}" class="m-avatar" referrerpolicy="no-referrer">`:`<div class="m-avatar-ph">${(m.name||'؟')[0]}</div>`;
-    html+=`<div class="member-row">
-      <div class="m-rank">${rankIcon}</div>${av}
-      <div class="m-info">
-        <div class="m-name">${m.name||''}${muid===currentUser.uid?' (أنت)':''}</div>
-        <div class="m-prog">مقطع ${toAr(mp+2)} من ${toAr(seriesData.length||1)}</div>
-      </div>
-      <span class="pill ${pillCls}">${pillTxt}</span>
-    </div>`;
-  });
-  html+=`</div>`;
-  el.innerHTML=html;
-}
-
-async function renderAttachments(){
-  const el=document.getElementById('attach-cnt');
-  el.innerHTML='<div class="empty">جاري التحميل...</div>';
-  const [attachments,sheetUrl]=await Promise.all([fbGet('attachments'),fbGet('config/sheetUrl')]);
-  const atts=attachments||{};
-  const keys=Object.keys(atts);
-  let html='';
-  // series first
-  if(sheetUrl){
-    html+=`<div style="background:var(--sur);border:.5px solid var(--bd);border-right:3px solid var(--green);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <div><div style="font-size:14px;font-weight:500;color:var(--tx);">📋 سلسلة التفسير كاملة</div><div style="font-size:11px;color:var(--tx2);margin-top:3px;">Google Sheet</div></div>
-      <button onclick="window.open('${sheetUrl}','_blank')" style="background:var(--gl);border:none;border-radius:10px;padding:8px 14px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;white-space:nowrap;min-height:36px;">فتح ↗</button>
-    </div>`;
-  }
-  keys.sort().forEach(k=>{
-    const a=atts[k];
-    html+=`<div style="background:var(--sur);border:.5px solid var(--bd);border-right:3px solid var(--blue);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <div><div style="font-size:14px;font-weight:500;color:var(--tx);">${a.name}</div>${a.url?`<div style="font-size:11px;color:var(--tx2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">${a.url}</div>`:''}</div>
-      ${a.url?`<button onclick="window.open('${a.url}','_blank')" style="background:var(--bl);border:none;border-radius:10px;padding:8px 14px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;white-space:nowrap;min-height:36px;">فتح ↗</button>`:''}
-    </div>`;
-  });
-  el.innerHTML=html||`<div class="empty">لا توجد مرفقات بعد<br><small style="font-size:13px;">ينتظر المشرف إضافتها</small></div>`;
-}
-
-// ── ADMIN REMINDER & ATTACHMENTS ──
-async function saveReminder(){
-  const txt=document.getElementById('adm-reminder-inp').value.trim();
-  if(!txt){setAdmReminderSt('الرجاء إدخال نص','err');return;}
-  await fbSet('config/reminder',txt);
-  setAdmReminderSt('✓ تم حفظ التذكير','ok');
-}
-function setAdmReminderSt(m,t){const el=document.getElementById('adm-reminder-st');el.style.display='block';el.className='st-msg '+(t||'');el.textContent=m;}
-
-
-async function addAttachment(){} // handled by addAttachmentRow now
 </script>
+
 </body>
 </html>
