@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حلقة الحفظ - الإصدار الذكي</title>
+    <title>حلقة الحفظ - النظام المتكامل</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
@@ -41,6 +41,13 @@
         </div>
     </main>
 
+    <main id="tab-p" class="cnt" style="display:none;">
+        <div class="card">
+            <h3 style="text-align:center; color:var(--green);"><i class="fas fa-file-contract"></i> اتفاقية الحلقة</h3>
+            <div id="agreements-text" style="line-height:1.8; white-space: pre-wrap; margin-top:15px; color:var(--text);"></div>
+        </div>
+    </main>
+
     <main id="tab-u" class="cnt" style="display:none;">
         <div class="card profile-card">
             <div class="profile-header">
@@ -69,6 +76,7 @@
     <nav class="bot-nav">
         <div class="nav-it active" onclick="switchTab('c', this)"><i class="fas fa-tasks"></i><span>الالتزامات</span></div>
         <div class="nav-it" onclick="switchTab('q', this)"><i class="fas fa-book-open"></i><span>المصحف</span></div>
+        <div class="nav-it" onclick="switchTab('p', this)"><i class="fas fa-handshake"></i><span>الاتفاقيات</span></div>
         <div class="nav-it" onclick="switchTab('u', this)"><i class="fas fa-user"></i><span>حسابي</span></div>
     </nav>
 </div>
@@ -79,20 +87,22 @@
         <button onclick="location.reload()" style="color:red; border:none; background:none;">خروج</button>
     </div>
     <div class="cnt active">
-        <div class="card admin-actions">
-            <button class="btn-main" onclick="startNewWeek('hifz')" style="background:#28a745; margin-bottom:10px;">أسبوع حفظ</button>
-            <button class="btn-main" onclick="startNewWeek('review')" style="background:#007bff;">أسبوع مراجعة</button>
-        </div>
         <div class="card">
             <label>رابط السلسلة (CSV):</label>
             <input type="text" id="sheet-url-input">
             <label>رابط المصحف:</label>
             <input type="text" id="quran-url-input">
-            <label>رسالة التنبيه:</label>
+            <label>رسالة تنبيه المصحف:</label>
             <input type="text" id="quran-note-input">
-            <button class="btn-main" onclick="saveAdminSettings()" style="margin-top:10px;">حفظ الإعدادات</button>
+            <label>نص الاتفاقيات:</label>
+            <textarea id="agreements-input" style="width:100%; height:100px; margin-top:10px; border-radius:10px; border:1px solid #ddd; padding:10px; font-family:inherit;"></textarea>
+            <button class="btn-main" onclick="saveAdminSettings()" style="margin-top:15px;">حفظ كل الإعدادات</button>
+        </div>
+        <div class="card admin-actions">
+            <button class="btn-main" onclick="startNewWeek('hifz')" style="background:#28a745; margin-bottom:10px;">أسبوع حفظ</button>
+            <button class="btn-main" onclick="startNewWeek('review')" style="background:#007bff;">أسبوع مراجعة</button>
             <hr>
-            <button class="btn-main" onclick="exportAdminReport()" style="background:#6c757d;">تصدير CSV</button>
+            <button class="btn-main" onclick="exportAdminReport()" style="background:#6c757d;">تصدير تقرير الأعضاء</button>
         </div>
     </div>
 </div>
