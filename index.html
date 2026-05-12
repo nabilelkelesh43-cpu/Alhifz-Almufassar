@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حلقة الحفظ - النظام المتكامل</title>
+    <title>الحفظ المفسر</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
 
@@ -14,95 +17,60 @@
 
 <div class="screen" id="scr-register">
     <div class="login-card">
-        <i class="fas fa-user-plus" style="font-size:40px; color:var(--green);"></i>
+        <i class="fas fa-user-plus" style="font-size:40px; color:#2c5e50;"></i>
         <h3>تسجيل عضو جديد</h3>
-        <input type="text" id="reg-name" placeholder="الاسم الثلاثي">
-        <button class="btn-main" onclick="registerUser()" style="margin-top:15px;">إنشاء الحساب</button>
+        <input type="text" id="reg-name" placeholder="الاسم الثلاثي كما في الكشف">
+        <button class="btn-main" onclick="registerUser()">إنشاء الحساب</button>
     </div>
 </div>
 
 <div class="screen" id="scr-main">
     <header class="app-hdr">
-        <div class="hdr-brand" onclick="handleAdminTap()">حلقة الحفظ</div>
-        <div id="status-badge" class="hdr-user">تحميل...</div>
+        <div class="hdr-brand" onclick="handleAdminTap()">الحفظ المفسر</div>
+        <div id="status-badge" class="hdr-user">جاري التحميل...</div>
     </header>
 
     <main id="tab-c" class="cnt active">
         <div id="tasks-container"></div>
-        <button id="btn-next-lesson" class="btn-main" style="display:none; background:#28a745; margin-top:10px;" onclick="unlockNextHifz()">طلب المقطع التالي +</button>
     </main>
 
     <main id="tab-q" class="cnt" style="display:none;">
         <div class="card" style="text-align:center;">
-            <i class="fas fa-book-quran" style="font-size:50px; color:var(--green); margin-bottom:15px;"></i>
+            <i class="fas fa-book-quran" style="font-size:50px; color:#2c5e50; margin-bottom:15px;"></i>
             <h3>المصحف الشريف</h3>
-            <p id="quran-note" style="color:var(--gray); margin-bottom:20px;"></p>
+            <p id="quran-note" style="color:gray; margin-bottom:20px;">يمكنك متابعة حفظك من الرابط أدناه</p>
             <a id="quran-link" href="#" target="_blank" class="btn-main" style="text-decoration:none; display:inline-block;">فتح المصحف</a>
         </div>
     </main>
 
     <main id="tab-p" class="cnt" style="display:none;">
         <div class="card">
-            <h3 style="text-align:center; color:var(--green);"><i class="fas fa-file-contract"></i> اتفاقية الحلقة</h3>
-            <div id="agreements-text" style="line-height:1.8; white-space: pre-wrap; margin-top:15px; color:var(--text);"></div>
-        </div>
-    </main>
-
-    <main id="tab-u" class="cnt" style="display:none;">
-        <div class="card profile-card">
-            <div class="profile-header">
-                <i class="fas fa-user-circle"></i>
-                <h3 id="u-name">...</h3>
-                <span id="u-id">...</span>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <small>غرامتك</small>
-                    <strong id="u-fine">0</strong>
-                </div>
-                <div class="stat-box">
-                    <small>المجموع العام</small>
-                    <strong id="total-all-fines">0</strong>
-                </div>
-            </div>
-            <div class="progress-info">
-                <p><i class="fas fa-bookmark"></i> متوقف في الحفظ عند: <br><span id="u-hifz-pos">-</span></p>
-                <hr>
-                <p><i class="fas fa-sync"></i> ديون المراجعة المتبقية: <br><span id="u-rev-count">0 مقاطع</span></p>
-            </div>
+            <h3 style="text-align:center; color:#2c5e50;"><i class="fas fa-file-contract"></i> اتفاقية الحلقة</h3>
+            <div id="agreements-text" style="line-height:1.8; white-space: pre-wrap; margin-top:15px;"></div>
         </div>
     </main>
 
     <nav class="bot-nav">
         <div class="nav-it active" onclick="switchTab('c', this)"><i class="fas fa-tasks"></i><span>الالتزامات</span></div>
         <div class="nav-it" onclick="switchTab('q', this)"><i class="fas fa-book-open"></i><span>المصحف</span></div>
-        <div class="nav-it" onclick="switchTab('p', this)"><i class="fas fa-handshake"></i><span>الاتفاقيات</span></div>
-        <div class="nav-it" onclick="switchTab('u', this)"><i class="fas fa-user"></i><span>حسابي</span></div>
+        <div class="nav-it" onclick="switchTab('p', this)"><i class="fas fa-handshake"></i><span>الاتفاقية</span></div>
     </nav>
 </div>
 
 <div class="screen" id="scr-admin">
     <div class="app-hdr">
-        <div class="hdr-brand">الإدارة</div>
+        <div class="hdr-brand">لوحة التحكم</div>
         <button onclick="location.reload()" style="color:red; border:none; background:none;">خروج</button>
     </div>
     <div class="cnt active">
         <div class="card">
-            <label>رابط السلسلة (CSV):</label>
-            <input type="text" id="sheet-url-input">
+            <label>رابط شيت المقاطع (CSV):</label>
+            <input type="text" id="sheet-url-input" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
             <label>رابط المصحف:</label>
             <input type="text" id="quran-url-input">
-            <label>رسالة تنبيه المصحف:</label>
-            <input type="text" id="quran-note-input">
-            <label>نص الاتفاقيات:</label>
-            <textarea id="agreements-input" style="width:100%; height:100px; margin-top:10px; border-radius:10px; border:1px solid #ddd; padding:10px; font-family:inherit;"></textarea>
-            <button class="btn-main" onclick="saveAdminSettings()" style="margin-top:15px;">حفظ كل الإعدادات</button>
-        </div>
-        <div class="card admin-actions">
-            <button class="btn-main" onclick="startNewWeek('hifz')" style="background:#28a745; margin-bottom:10px;">أسبوع حفظ</button>
-            <button class="btn-main" onclick="startNewWeek('review')" style="background:#007bff;">أسبوع مراجعة</button>
-            <hr>
-            <button class="btn-main" onclick="exportAdminReport()" style="background:#6c757d;">تصدير تقرير الأعضاء</button>
+            <label>نص الاتفاقية:</label>
+            <textarea id="agreements-input" style="width:100%; height:120px; margin-top:10px; border-radius:10px; border:1px solid #ddd; padding:10px; font-family:inherit;"></textarea>
+            <button class="btn-main" onclick="saveAdminSettings()" style="margin-top:15px; background:#2c5e50;">حفظ وتحديث عند الجميع</button>
         </div>
     </div>
 </div>
