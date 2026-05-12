@@ -2,22 +2,21 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
 body { background: var(--bg); direction: rtl; }
 
-.screen { display: none; height: 100vh; width: 100%; position: fixed; }
+.screen { display: none; height: 100vh; width: 100%; position: fixed; top:0; left:0; }
 .screen.active { display: flex; flex-direction: column; }
 
-.app-hdr { background: var(--green); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.app-hdr { background: var(--green); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
 .hdr-brand { font-weight: bold; cursor: pointer; }
 .hdr-user { font-size: 0.85rem; opacity: 0.9; }
 
 .cnt { flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 90px; }
 .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
 
-.btn-main { background: var(--green); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.3s; }
-.btn-main:active { transform: scale(0.98); }
+.btn-main { background: var(--green); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; }
 
-input[type="text"] { width: 100%; padding: 12px; margin: 10px 0 15px 0; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; }
+input[type="text"], textarea { width: 100%; padding: 12px; margin: 10px 0 15px 0; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; }
 
-.bot-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #eee; height: 75px; z-index: 100; }
+.bot-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #eee; height: 75px; }
 .nav-it { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; cursor: pointer; }
 .nav-it.active { color: var(--green); font-weight: bold; }
 .nav-it i { font-size: 1.4rem; margin-bottom: 3px; }
