@@ -6,83 +6,68 @@
     <title>نظام الحفظ المفسر المتكامل</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
-        :root { --green: #2c5e50; --bg: #f4f7f6; --accent: #007bff; --danger: #dc3545; }
+        :root { --green: #2c5e50; --bg: #f4f7f6; --danger: #dc3545; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
         body { background: var(--bg); color: #333; }
-        
-        /* شاشات التطبيق */
         .screen { display: none; min-height: 100vh; width: 100%; }
         .screen.active { display: flex; flex-direction: column; }
-        
-        /* الهيدر */
-        .app-hdr { background: var(--green); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .hdr-brand { font-weight: bold; cursor: pointer; }
-        .hdr-user { font-size: 0.8rem; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 15px; }
-
+        .app-hdr { background: var(--green); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
         .cnt { flex: 1; padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; padding-bottom: 90px; }
-        
-        /* تصميم الكروت والأزرار */
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; }
-        .btn-main { background: var(--green); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; display: block; text-align: center; text-decoration: none; margin-top: 10px; transition: 0.3s; border: none; }
-        .btn-google { background: #4285F4; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; }
-
-        /* شاشة الدخول */
-        .login-container { margin: auto; text-align: center; padding: 20px; }
-        .login-logo { font-size: 60px; color: var(--green); margin-bottom: 20px; }
-
-        /* شريط التنقل السفلي */
-        .bot-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #eee; height: 65px; z-index: 1000; }
+        .card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .btn-main { background: var(--green); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+        .task-item { display: flex; align-items: center; gap: 15px; padding: 12px; border-bottom: 1px solid #eee; }
+        .task-item input { width: 22px; height: 22px; cursor: pointer; }
+        .bot-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #eee; height: 65px; }
         .nav-it { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; cursor: pointer; }
         .nav-it.active { color: var(--green); }
-        .nav-it i { font-size: 1.2rem; }
-        .nav-it span { font-size: 0.7rem; margin-top: 2px; }
+        input[type="text"], select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
     </style>
 </head>
 <body>
 
 <div class="screen active" id="scr-loading">
-    <div style="margin: auto; text-align: center;">
-        <i class="fas fa-circle-notch fa-spin" style="font-size: 40px; color: var(--green);"></i>
-        <p style="margin-top: 15px; color: var(--green);">جاري تهيئة النظام...</p>
-    </div>
+    <div style="margin: auto; text-align: center;"><i class="fas fa-circle-notch fa-spin fa-2x"></i></div>
 </div>
 
 <div class="screen" id="scr-login">
-    <div class="login-container">
-        <div class="card">
-            <i class="fas fa-mosque login-logo"></i>
-            <h2>حلقة الحفظ المفسر</h2>
-            <p style="margin-bottom: 20px; color: #666;">سجل دخولك لمتابعة وردك اليومي</p>
-            <button class="btn-main btn-google" onclick="handleGoogleLogin()">
-                <i class="fab fa-google"></i> الدخول عبر Google
-            </button>
-        </div>
-    </div>
+    <div class="cnt" style="display:flex; align-items:center;"><div class="card" style="width:100%; text-align:center;">
+        <i class="fas fa-mosque fa-3x" style="color:var(--green)"></i>
+        <h2 style="margin:15px 0">الحفظ المفسر</h2>
+        <button class="btn-main" onclick="handleLogin()" style="background:#4285F4"><i class="fab fa-google"></i> دخول بالجيميل</button>
+    </div></div>
 </div>
 
 <div class="screen" id="scr-main">
     <header class="app-hdr">
-        <div class="hdr-brand" onclick="checkAdmin()">الحفظ المفسر</div>
-        <div id="display-user-name" class="hdr-user">...</div>
+        <div onclick="openAdmin()" style="cursor:pointer">إدارة الحلقة</div>
+        <div id="u-name" style="font-size:0.8rem; background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:15px;">...</div>
     </header>
-
     <main class="cnt">
-        <div id="home-content">
-            <div class="card">
-                <h3 id="welcome-msg">أهلاً بك</h3>
-                <p id="stats-msg">جاري تحميل بياناتك...</p>
-            </div>
-            <div id="tasks-list"></div>
+        <div class="card" style="display:flex; justify-content:space-around; text-align:center;">
+            <div><small>الغرامات</small><div id="u-fines" style="font-weight:bold; color:red">0</div></div>
+            <div><small>المنجز</small><div id="u-done" style="font-weight:bold; color:green">0</div></div>
         </div>
+        <h4 style="margin-bottom:10px">مقاطع الورد اليومي:</h4>
+        <div id="tasks-list"></div>
     </main>
-
     <nav class="bot-nav">
         <div class="nav-it active"><i class="fas fa-home"></i><span>الرئيسية</span></div>
-        <div class="nav-it" onclick="alert('قريباً')"><i class="fas fa-book-open"></i><span>المصحف</span></div>
         <div class="nav-it" onclick="auth.signOut()"><i class="fas fa-sign-out-alt"></i><span>خروج</span></div>
     </nav>
+</div>
+
+<div class="screen" id="scr-admin">
+    <header class="app-hdr"><div>لوحة التحكم</div><button onclick="showScreen('scr-main')" style="background:none; border:none; color:white">إغلاق</button></header>
+    <div class="cnt">
+        <div class="card">
+            <h3>إعدادات الورد</h3>
+            <label>رابط الشيت (CSV):</label>
+            <input type="text" id="csv-url" placeholder="ضع رابط CSV هنا">
+            <button class="btn-main" onclick="saveAdmin()">حفظ الإعدادات</button>
+        </div>
+        <div id="users-admin-list"></div>
+    </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -90,9 +75,8 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-// إعدادات المشروع - بناءً على صورك والمفتاح الجديد
 const firebaseConfig = {
-  apiKey: "AIzaSyDxzFOjPwjQL0oAG5lmgOs7VxhoRLbebZc",
+  apiKey: "AIzaSyDxzFOjPwjQL0OAG5lmgOs7VxhoRLbebZc",
   authDomain: "alhifz-almufassar.firebaseapp.com",
   databaseURL: "https://alhifz-almufassar-default-rtdb.firebaseio.com",
   projectId: "alhifz-almufassar",
@@ -101,56 +85,80 @@ const firebaseConfig = {
   appId: "1:137379079577:web:41e516c414f4997c8adf08"
 };
 
-// تهيئة Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// وظيفة تسجيل الدخول
-function handleGoogleLogin() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    // استخدام PopUp يتجنب مشاكل Domain Authorization في GitHub
-    auth.signInWithPopup(provider)
-        .then((result) => {
-            console.log("نجح الدخول:", result.user.displayName);
-        })
-        .catch((error) => {
-            console.error("خطأ تسجيل الدخول:", error);
-            alert("حدث خطأ أثناء تسجيل الدخول: " + error.message);
-        });
+let currentUser = null;
+let appSettings = {};
+
+function handleLogin() {
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
 }
 
-// مراقبة حالة المستخدم
-auth.onAuthStateChanged((user) => {
+auth.onAuthStateChanged(user => {
     document.getElementById('scr-loading').classList.remove('active');
     if (user) {
-        document.getElementById('scr-login').classList.remove('active');
-        document.getElementById('scr-main').classList.add('active');
-        document.getElementById('display-user-name').innerText = user.displayName;
-        loadUserData(user);
+        currentUser = user;
+        document.getElementById('u-name').innerText = user.displayName;
+        showScreen('scr-main');
+        initApp();
     } else {
-        document.getElementById('scr-main').classList.remove('active');
-        document.getElementById('scr-login').classList.add('active');
+        showScreen('scr-login');
     }
 });
 
-function loadUserData(user) {
-    const userRef = db.ref('hifz_users_data/' + user.uid);
-    userRef.on('value', (snapshot) => {
-        const data = snapshot.val() || { fines: 0, doneCount: 0 };
-        document.getElementById('stats-msg').innerText = `المنجز: ${data.doneCount || 0} | الغرامات: ${data.fines || 0} ج`;
+function initApp() {
+    // 1. جلب الإعدادات (رابط الشيت)
+    db.ref('settings').on('value', s => {
+        appSettings = s.val() || {};
+        document.getElementById('csv-url').value = appSettings.csvUrl || '';
+        loadTasks();
+    });
+    // 2. جلب بيانات المستخدم (غرامات ومنجز)
+    db.ref('users/' + currentUser.uid).on('value', s => {
+        const data = s.val() || { fines: 0, done: [] };
+        document.getElementById('u-fines').innerText = data.fines || 0;
+        document.getElementById('u-done').innerText = (data.done || []).length;
     });
 }
 
-function checkAdmin() {
-    const pin = prompt("أدخل رمز الإدارة:");
-    if(pin === "1234") {
-        alert("مرحباً بك في لوحة الإدارة (قيد التطوير)");
-    }
+function loadTasks() {
+    if(!appSettings.csvUrl) return;
+    fetch(appSettings.csvUrl)
+        .then(res => res.text())
+        .then(csv => {
+            const lines = csv.split('\n').slice(1);
+            const container = document.getElementById('tasks-list');
+            container.innerHTML = '';
+            lines.forEach((line, index) => {
+                const cols = line.split(',');
+                if(cols[0]) {
+                    container.innerHTML += `
+                        <div class="card task-item">
+                            <input type="checkbox" onchange="toggleTask('${index}')">
+                            <div style="flex:1"><b>${cols[0]}</b><br><small>${cols[1] || ''}</small></div>
+                            <a href="${cols[2]}" target="_blank" style="color:var(--green)"><i class="fas fa-play-circle fa-lg"></i></a>
+                        </div>`;
+                }
+            });
+        });
+}
+
+function openAdmin() {
+    const pass = prompt("كلمة سر الإدارة:");
+    if(pass === "1234") showScreen('scr-admin');
+}
+
+function saveAdmin() {
+    const url = document.getElementById('csv-url').value;
+    db.ref('settings').update({ csvUrl: url }).then(() => alert("تم الحفظ"));
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
 }
 </script>
-
 </body>
 </html>
