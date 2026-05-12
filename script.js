@@ -15,7 +15,7 @@ async function fetchData() {
         const text = await res.text();
         allTasks = text.split('\n').slice(1).map(line => line.split(',').map(c => c.trim()));
         renderTasks();
-        loadQuranData();
+        loadSettings();
         updateUI();
     } catch (e) { console.error("Error loading data"); }
 }
@@ -90,20 +90,27 @@ function updateTask(idx, key) {
 
 function saveDB() { localStorage.setItem('hifz_db', JSON.stringify(db)); }
 
-function loadQuranData() {
+function loadSettings() {
     const qUrl = localStorage.getItem('quranUrl') || "#";
     const qNote = localStorage.getItem('quranNote') || "يرجى تحميل المصحف";
+    const agreements = localStorage.getItem('agreementsText') || "لم يتم تحديد قوانين بعد.";
+    
     document.getElementById('quran-link').href = qUrl;
     document.getElementById('quran-note').innerText = qNote;
+    document.getElementById('agreements-text').innerText = agreements;
+
+    // تعبئة لوحة الإدارة
     document.getElementById('sheet-url-input').value = localStorage.getItem('customSheetUrl') || DEFAULT_URL;
     document.getElementById('quran-url-input').value = qUrl;
     document.getElementById('quran-note-input').value = qNote;
+    document.getElementById('agreements-input').value = agreements;
 }
 
 function saveAdminSettings() {
     localStorage.setItem('customSheetUrl', document.getElementById('sheet-url-input').value);
     localStorage.setItem('quranUrl', document.getElementById('quran-url-input').value);
     localStorage.setItem('quranNote', document.getElementById('quran-note-input').value);
+    localStorage.setItem('agreementsText', document.getElementById('agreements-input').value);
     alert("تم حفظ جميع الإعدادات"); location.reload();
 }
 
@@ -133,7 +140,6 @@ function handleAdminTap() {
 }
 
 function updateUI() { document.getElementById('status-badge').innerText = db.weekMode === 'hifz' ? "أسبوع حفظ" : "أسبوع مراجعة"; }
-
 function unlockNextHifz() { db.currentHifzPointer++; db.hasDoneMinimumThisWeek = true; saveDB(); renderTasks(); }
 
 function exportAdminReport() {
