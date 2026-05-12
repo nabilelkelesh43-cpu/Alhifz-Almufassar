@@ -17,17 +17,17 @@
 
 <div class="screen" id="scr-register">
     <div class="login-card">
-        <i class="fas fa-user-circle" style="font-size:50px; color:#2c5e50;"></i>
-        <h3>أهلاً بك في الحلقة</h3>
+        <i class="fas fa-user-plus" style="font-size:50px; color:#2c5e50;"></i>
+        <h3>مرحباً بك في الحلقة</h3>
         <input type="text" id="reg-name" placeholder="أدخل اسمك الثلاثي للتسجيل">
-        <button class="btn-main" onclick="registerUser()">دخول النظام</button>
+        <button class="btn-main" onclick="registerUser()">بدء الاستخدام</button>
     </div>
 </div>
 
 <div class="screen" id="scr-main">
     <header class="app-hdr">
         <div class="hdr-brand" onclick="handleAdminTap()">الحفظ المفسر</div>
-        <div id="u-name-display" class="hdr-user">...</div>
+        <div id="u-name-display" class="hdr-user">جاري التحميل...</div>
     </header>
 
     <main id="tab-c" class="cnt active">
@@ -38,39 +38,39 @@
         <div class="card" style="text-align:center;">
             <i class="fas fa-book-quran" style="font-size:60px; color:#2c5e50; margin-bottom:20px;"></i>
             <h3>المصحف الشريف</h3>
-            <p style="color:gray; margin-bottom:25px;">النسخة المعتمدة لمتابعة الحفظ</p>
+            <p style="color:gray; margin-bottom:25px;">النسخة المعتمدة للمراجعة</p>
             <a id="quran-link" href="#" target="_blank" class="btn-main" style="text-decoration:none; display:inline-block;">فتح المصحف</a>
         </div>
     </main>
 
     <main id="tab-p" class="cnt" style="display:none;">
         <div class="card">
-            <h3 style="text-align:center; color:#2c5e50;"><i class="fas fa-handshake"></i> ميثاق الحلقة</h3>
-            <div id="agreements-text" style="line-height:1.8; white-space: pre-wrap; margin-top:15px; font-size:0.95rem;"></div>
+            <h3 style="text-align:center; color:#2c5e50;"><i class="fas fa-file-contract"></i> ميثاق الحلقة</h3>
+            <div id="agreements-text" style="line-height:1.8; white-space: pre-wrap; margin-top:15px;"></div>
         </div>
     </main>
 
     <nav class="bot-nav">
-        <div class="nav-it active" onclick="switchTab('c', this)"><i class="fas fa-tasks"></i><span>الالتزامات</span></div>
+        <div class="nav-it active" onclick="switchTab('c', this)"><i class="fas fa-list-check"></i><span>الالتزامات</span></div>
         <div class="nav-it" onclick="switchTab('q', this)"><i class="fas fa-book-open"></i><span>المصحف</span></div>
-        <div class="nav-it" onclick="switchTab('p', this)"><i class="fas fa-file-signature"></i><span>الاتفاقية</span></div>
+        <div class="nav-it" onclick="switchTab('p', this)"><i class="fas fa-handshake"></i><span>الاتفاقية</span></div>
     </nav>
 </div>
 
 <div class="screen" id="scr-admin">
     <div class="app-hdr">
-        <div class="hdr-brand">إعدادات الإدارة</div>
-        <button onclick="location.reload()" style="color:white; border:none; background:none;">خروج</button>
+        <div class="hdr-brand">لوحة الإدارة</div>
+        <button onclick="location.reload()" style="color:white; border:none; background:none; cursor:pointer;">خروج</button>
     </div>
     <div class="cnt active">
         <div class="card">
             <label>رابط CSV لسلسلة التفسير:</label>
-            <input type="text" id="sheet-url-input" placeholder="رابط النشر للويب بصيغة CSV">
+            <input type="text" id="sheet-url-input">
             <label>رابط المصحف:</label>
             <input type="text" id="quran-url-input">
             <label>نص الاتفاقية والميثاق:</label>
             <textarea id="agreements-input" style="width:100%; height:150px; margin-top:10px; border-radius:8px; border:1px solid #ddd; padding:10px; font-family:inherit;"></textarea>
-            <button class="btn-main" onclick="saveAdminSettings()" style="margin-top:20px;">حفظ وتعديل عند الجميع</button>
+            <button class="btn-main" onclick="saveAdminSettings()" style="margin-top:20px;">حفظ وتعميم التغييرات</button>
         </div>
     </div>
 </div>
