@@ -10,6 +10,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 </head>
 <body>
 
@@ -17,10 +18,15 @@
 
 <div class="screen" id="scr-register">
     <div class="login-card">
-        <i class="fas fa-user-plus" style="font-size:50px; color:#2c5e50;"></i>
+        <div style="background: #f8f9fa; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+            <i class="fab fa-google" style="font-size:40px; color:#4285F4;"></i>
+        </div>
         <h3>مرحباً بك في الحلقة</h3>
-        <input type="text" id="reg-name" placeholder="أدخل اسمك الثلاثي للتسجيل">
-        <button class="btn-main" onclick="registerUser()">بدء الاستخدام</button>
+        <p style="color:gray; margin-bottom:25px; font-size: 0.9rem;">يرجى تسجيل الدخول بحساب جوجل للمتابعة</p>
+        <button class="btn-main" onclick="signInWithGoogle()" style="background:#4285F4; display:flex; align-items:center; justify-content:center; gap:10px;">
+            <i class="fab fa-google"></i>
+            تسجيل الدخول عبر Gmail
+        </button>
     </div>
 </div>
 
@@ -71,6 +77,7 @@
             <label>نص الاتفاقية والميثاق:</label>
             <textarea id="agreements-input" style="width:100%; height:150px; margin-top:10px; border-radius:8px; border:1px solid #ddd; padding:10px; font-family:inherit;"></textarea>
             <button class="btn-main" onclick="saveAdminSettings()" style="margin-top:20px;">حفظ وتعميم التغييرات</button>
+            <button onclick="signOut()" style="margin-top:15px; background:#dc3545; color:white; border:none; padding:10px; border-radius:8px; width:100%; font-weight:bold;">تسجيل خروج من الحساب</button>
         </div>
     </div>
 </div>
