@@ -1,6 +1,6 @@
-// بيانات الربط - يرجى التأكد من الـ apiKey مجدداً
+// بيانات الربط المستخرجة من صورة الـ SDK الخاصة بك
 const firebaseConfig = {
-  apiKey: "AIzaSyDxzFOjPwjQL0oAG5lmg0s7VxhoRLbeZc", 
+  apiKey: "AIzaSyDxzFOjPwjQL0oAG5lmgOs7VxhoRLbebZc", 
   authDomain: "alhifz-almufassar.firebaseapp.com",
   databaseURL: "https://alhifz-almufassar-default-rtdb.firebaseio.com",
   projectId: "alhifz-almufassar",
@@ -15,31 +15,33 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// المرجع الموحد لقاعدة البيانات (hifz_settings) بناءً على صورتك الأخيرة
+// استخدام المسار الموحد hifz_settings كما يظهر في قاعدة بياناتك
 const db = firebase.database().ref('hifz_settings');
 
 let allTasks = [];
 let currentUser = null;
 let userPointer = 0;
 
-// تسجيل الدخول بجوجل
+// دالة تسجيل الدخول بجوجل
 function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithPopup(provider)
-        .then(() => { console.log("User signed in"); })
-        .catch((error) => {
+        .then((result) => {
+            console.log("Logged in:", result.user.displayName);
+        }).catch((error) => {
             console.error("Auth Error:", error);
-            alert("خطأ في تسجيل الدخول: " + error.message);
+            // إذا ظهر خطأ API Key هنا، اتبع تعليمات حل القيود أدناه
+            alert("فشل تسجيل الدخول: " + error.message);
         });
 }
 
-// مراقبة حالة المستخدم والبيانات
+// مراقبة حالة المستخدم وتحميل بياناته
 window.onload = () => {
     firebase.auth().onAuthStateChanged((user) => {
         const loadingScreen = document.getElementById('scr-loading');
         if (user) {
             currentUser = user;
-            // جلب التقدم بناءً على الإيميل لضمان الخصوصية
+            // جلب التقدم بناءً على البريد الإلكتروني للحفاظ على خصوصية كل طالب
             const savedData = JSON.parse(localStorage.getItem('hifz_progress_' + user.email)) || { pointer: 0 };
             userPointer = savedData.pointer;
 
@@ -61,7 +63,7 @@ function startSync() {
             document.getElementById('quran-link').href = data.quranUrl || "#";
             document.getElementById('agreements-text').innerText = data.agreements || "";
             
-            // تحديث قيم لوحة الإدارة تلقائياً
+            // تحديث مدخلات لوحة الإدارة إذا كانت موجودة
             if(document.getElementById('sheet-url-input')) {
                 document.getElementById('sheet-url-input').value = data.seriesSheetUrl || "";
                 document.getElementById('quran-url-input').value = data.quranUrl || "";
@@ -142,4 +144,8 @@ function switchTab(id, el) {
     document.getElementById('tab-' + id).style.display = 'block';
     document.querySelectorAll('.nav-it').forEach(n => n.classList.remove('active'));
     el.classList.add('active');
+}
+
+function signOut() {
+    firebase.auth().signOut().then(() => location.reload());
 }
