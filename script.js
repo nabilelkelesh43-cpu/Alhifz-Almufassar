@@ -1,4 +1,4 @@
-// بيانات الربط المستخرجة من صورة الـ SDK الخاصة بك
+// بيانات الربط (تأكد من الـ API Key)
 const firebaseConfig = {
   apiKey: "AIzaSyDxzFOjPwjQL0oAG5lmgOs7VxhoRLbebZc", 
   authDomain: "alhifz-almufassar.firebaseapp.com",
@@ -6,53 +6,30 @@ const firebaseConfig = {
   projectId: "alhifz-almufassar",
   storageBucket: "alhifz-almufassar.firebasestorage.app",
   messagingSenderId: "137379079577",
-  appId: "1:137379079577:web:41e516c414f4997c8adf08",
-  measurementId: "G-56796ZFDZR"
+  appId: "1:137379079577:web:41e516c414f4997c8adf08"
 };
 
-// تهيئة Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-
-// استخدام المسار الموحد hifz_settings كما يظهر في قاعدة بياناتك
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database().ref('hifz_settings');
 
 let allTasks = [];
 let currentUser = null;
-let userPointer = 0;
+let userData = { pointer: 0, fines: 0, reviewedIndices: [] };
+let appMode = "hifz"; // hifz أو review
 
-// دالة تسجيل الدخول بجوجل
-function signInWithGoogle() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(provider)
-        .then((result) => {
-            console.log("Logged in:", result.user.displayName);
-        }).catch((error) => {
-            console.error("Auth Error:", error);
-            // إذا ظهر خطأ API Key هنا، اتبع تعليمات حل القيود أدناه
-            alert("فشل تسجيل الدخول: " + error.message);
-        });
-}
-
-// مراقبة حالة المستخدم وتحميل بياناته
 window.onload = () => {
     firebase.auth().onAuthStateChanged((user) => {
-        const loadingScreen = document.getElementById('scr-loading');
         if (user) {
             currentUser = user;
-            // جلب التقدم بناءً على البريد الإلكتروني للحفاظ على خصوصية كل طالب
-            const savedData = JSON.parse(localStorage.getItem('hifz_progress_' + user.email)) || { pointer: 0 };
-            userPointer = savedData.pointer;
-
-            document.getElementById('scr-register').classList.remove('active');
-            document.getElementById('scr-main').classList.add('active');
+            // جلب بيانات المستخدم من Firebase أو LocalStorage
+            const saved = JSON.parse(localStorage.getItem('hifz_data_' + user.email)) || { pointer: 0, fines: 0, reviewedIndices: [] };
+            userData = saved;
             document.getElementById('u-name-display').innerText = user.displayName;
             startSync();
         } else {
             document.getElementById('scr-register').classList.add('active');
         }
-        if(loadingScreen) loadingScreen.classList.remove('active');
+        document.getElementById('scr-loading').classList.remove('active');
     });
 };
 
@@ -60,15 +37,13 @@ function startSync() {
     db.on('value', (snap) => {
         const data = snap.val();
         if (data) {
+            appMode = data.currentMode || "hifz";
             document.getElementById('quran-link').href = data.quranUrl || "#";
             document.getElementById('agreements-text').innerText = data.agreements || "";
             
-            // تحديث مدخلات لوحة الإدارة إذا كانت موجودة
-            if(document.getElementById('sheet-url-input')) {
-                document.getElementById('sheet-url-input').value = data.seriesSheetUrl || "";
-                document.getElementById('quran-url-input').value = data.quranUrl || "";
-                document.getElementById('agreements-input').value = data.agreements || "";
-            }
+            // تحديث لوحة الإدارة
+            document.getElementById('mode-selector').value = appMode;
+            document.getElementById('sheet-url-input').value = data.seriesSheetUrl || "";
 
             if (data.seriesSheetUrl) fetchSheetData(data.seriesSheetUrl);
         }
@@ -79,73 +54,99 @@ async function fetchSheetData(url) {
     try {
         const res = await fetch(`${url}&t=${Date.now()}`);
         const text = await res.text();
-        allTasks = text.split('\n').slice(1).map(row => {
+        allTasks = text.split('\n').slice(1).map((row, index) => {
             const cols = row.split(',');
-            return { title: cols[0], ayat: cols[1], link: cols[2] };
-        }).filter(t => t.title && t.title.trim() !== "");
-        renderTasks();
-    } catch (e) { console.error("Sheet Error:", e); }
+            return { id: index, title: cols[0], ayat: cols[1], link: cols[2] };
+        }).filter(t => t.title);
+        renderContent();
+    } catch (e) { console.error(e); }
 }
 
-function renderTasks() {
+function renderContent() {
     const container = document.getElementById('tasks-container');
-    if (!allTasks[userPointer]) {
-        container.innerHTML = "<div class='card' style='text-align:center;'>🏁 اكتملت السلسلة بنجاح!</div>";
+    container.innerHTML = "";
+
+    if (appMode === "hifz") {
+        renderHifzMode(container);
+    } else {
+        renderReviewMode(container);
+    }
+}
+
+// --- وضع الحفظ ---
+function renderHifzMode(container) {
+    const task = allTasks[userData.pointer];
+    if (!task) {
+        container.innerHTML = "<div class='card'>🏁 انتهى الحفظ الحالي!</div>";
         return;
     }
-    const task = allTasks[userPointer];
+
     container.innerHTML = `
         <div class="card animate-in">
-            <small style="color:#2c5e50;">المقطع الحالي:</small>
-            <h2 style="font-size:1.2rem; margin:10px 0;">${task.title}</h2>
-            <div style="background:#f4f7f6; padding:10px; border-radius:8px; margin-bottom:15px; font-size:0.9rem;">
-                <i class="fas fa-bookmark"></i> ${task.ayat}
+            <div class="mode-badge">أسبوع الحفظ</div>
+            <h2>${task.title}</h2>
+            <p><i class="fas fa-bookmark"></i> ${task.ayat}</p>
+            <a href="${task.link}" target="_blank" class="btn-link">فتح مقطع التفسير</a>
+            <div class="check-list">
+                <label><input type="checkbox" class="h-check"> سماع المقطع</label>
+                <label><input type="checkbox" class="h-check"> قراءة التفسير</label>
+                <label><input type="checkbox" class="h-check"> التكرار (المطاليب)</label>
+                <label><input type="checkbox" id="final-hifz" onchange="checkHifzProgress()"> التسميع غيباً</label>
             </div>
-            <a href="${task.link}" target="_blank" class="btn-main" style="background:#007bff; text-decoration:none; display:block; text-align:center; margin-bottom:15px;">
-                <i class="fab fa-telegram"></i> مشاهدة التفسير
-            </a>
-            <div style="border-top:1px solid #eee; padding-top:15px;">
-                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-                    <input type="checkbox" style="width:20px; height:20px;" onchange="markDone(this)">
-                    <span style="font-weight:bold;">أتممت السماع والتسميع غيباً</span>
-                </label>
-            </div>
+            <div id="fine-alert" class="fine-box" style="display:none;">⚠️ ستسجل غرامة 50 جنيهاً إذا لم تنجز مقطعاً!</div>
         </div>`;
 }
 
-function markDone(el) {
-    if (el.checked && currentUser) {
-        setTimeout(() => {
-            userPointer++;
-            localStorage.setItem('hifz_progress_' + currentUser.email, JSON.stringify({ pointer: userPointer }));
-            renderTasks();
-        }, 500);
+// --- وضع المراجعة ---
+function renderReviewMode(container) {
+    // المقاطع المطلوب مراجعتها هي كل ما تم حفظه (أقل من Pointer) ولم يتم مراجعته في هذا الأسبوع
+    const toReview = allTasks.filter((t, index) => index < userData.pointer && !userData.reviewedIndices.includes(index));
+
+    if (toReview.length === 0) {
+        container.innerHTML = "<div class='card'>✅ أتممت جميع المراجعات المطلوبة!</div>";
+        return;
+    }
+
+    container.innerHTML = `<h3>مقاطع المراجعة (${toReview.length})</h3>`;
+    toReview.forEach(task => {
+        container.innerHTML += `
+            <div class="card review-card">
+                <h4>${task.title}</h4>
+                <p>${task.ayat}</p>
+                <button class="btn-main" onclick="markReviewed(${task.id})">أتممت المراجعة</button>
+            </div>`;
+    });
+}
+
+function checkHifzProgress() {
+    const checks = document.querySelectorAll('.h-check:checked').length;
+    if (checks >= 3 && document.getElementById('final-hifz').checked) {
+        userData.pointer++;
+        saveData();
+        renderContent();
+    } else {
+        alert("يرجى إتمام جميع المطاليب أولاً");
+        document.getElementById('final-hifz').checked = false;
     }
 }
 
+function markReviewed(id) {
+    userData.reviewedIndices.push(id);
+    saveData();
+    renderContent();
+}
+
+function saveData() {
+    localStorage.setItem('hifz_data_' + currentUser.email, JSON.stringify(userData));
+    // هنا يمكن إضافة كود لرفع البيانات لـ Firebase لو أردت مراقبة الطلاب
+}
+
+// --- لوحة الإدارة ---
 function saveAdminSettings() {
     db.update({
+        currentMode: document.getElementById('mode-selector').value,
         seriesSheetUrl: document.getElementById('sheet-url-input').value,
         quranUrl: document.getElementById('quran-url-input').value,
         agreements: document.getElementById('agreements-input').value
-    }).then(() => alert("تم الحفظ بنجاح!")).catch(e => alert(e.message));
-}
-
-function handleAdminTap() {
-    const pass = prompt("كلمة مرور الإدارة:");
-    if (pass === "123456") {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('scr-admin').classList.add('active');
-    }
-}
-
-function switchTab(id, el) {
-    document.querySelectorAll('.cnt').forEach(c => c.style.display = 'none');
-    document.getElementById('tab-' + id).style.display = 'block';
-    document.querySelectorAll('.nav-it').forEach(n => n.classList.remove('active'));
-    el.classList.add('active');
-}
-
-function signOut() {
-    firebase.auth().signOut().then(() => location.reload());
+    }).then(() => alert("تم تحديث وضع الحلقة بنجاح!"));
 }
